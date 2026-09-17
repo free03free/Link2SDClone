@@ -21,12 +21,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      # لا حاجة لتثبيت Android SDK من الصفر؛ أجهزة GitHub تأتي به مسبقاً.
-      # هذه الخطوة فقط تقبل التراخيص وتضمن توفر المنصة/أدوات البناء المطلوبة.
+      # نبحث عن sdkmanager الموجود مسبقاً على الجهاز بدلاً من افتراض أنه في PATH
       - name: قبول تراخيص Android SDK وتثبيت الحزم المطلوبة
         run: |
-          yes | sdkmanager --licenses > /dev/null || true
-          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
+          SDKMANAGER=$(find "$ANDROID_HOME" -name "sdkmanager" -type f | sort -r | head -n 1)
+          echo "Using sdkmanager at: $SDKMANAGER"
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
       - name: إعداد Gradle
         uses: gradle/actions/setup-gradle@v4
