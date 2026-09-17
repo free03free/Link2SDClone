@@ -21,10 +21,14 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: إعداد Android SDK
-        uses: android-actions/setup-android@v3
+      # لا حاجة لتثبيت Android SDK من الصفر؛ أجهزة GitHub تأتي به مسبقاً.
+      # هذه الخطوة فقط تقبل التراخيص وتضمن توفر المنصة/أدوات البناء المطلوبة.
+      - name: قبول تراخيص Android SDK وتثبيت الحزم المطلوبة
+        run: |
+          yes | sdkmanager --licenses > /dev/null || true
+          sdkmanager "platform-tools" "platforms;android-34" "build-tools;34.0.0"
 
-      - name: إعداد Gradle (وتوليد الـ wrapper jar تلقائياً)
+      - name: إعداد Gradle
         uses: gradle/actions/setup-gradle@v4
 
       - name: توليد ملفات Gradle Wrapper
