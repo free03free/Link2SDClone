@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Lets us build a content:// Uri that points at another app's APK file
+         (its real path under /data/app/...) for the "Share app" action. -->
+    <root-path name="root" path="." />
+    <external-path name="external" path="." />
+    <cache-path name="cache" path="." />
+</paths>

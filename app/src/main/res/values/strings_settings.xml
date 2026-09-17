@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="pref_upgrade_title">Link2SD Plus</string>
+    <string name="pref_upgrade_summary">قم بترقية للحصول على Link2SD Plus متاح في سوق Play. مميزات إضافية و حذف الإعلانات.</string>
+
+    <string name="pref_cat_freeze">التجميد</string>
+    <string name="pref_cat_general">عام</string>
+    <string name="pref_appearance_title">المظهر</string>
+    <string name="pref_language_title">اللغة</string>
+    <string name="pref_relink_lib_boot_title">إعادة ربط ملفات lib عند التشغيل</string>
+    <string name="pref_relink_dex_boot_title">Relink dex files at boot</string>
+    <string name="pref_relink_dex_boot_summary">Automatically relink dex files at boot (if necessary)</string>
+    <string name="pref_bind_dirs_notification_title">Bind directories notification</string>
+    <string name="pref_bind_dirs_notification_summary">Display notification when ext. data and obb directories are bound during boot</string>
+
+    <string name="pref_cat_clear_cache">محو ذاكرة التخزين المؤقت</string>
+    <string name="pref_clear_cache_notif_size_title">Clear cache notification size(MB)</string>
+    <string name="pref_clear_external_cache_title">امسح الملفات الخارجية المؤقتة</string>
+    <string name="pref_auto_clear_cache_title">قم بمسح تلقائي لذاكرة التخزين</string>
+    <string name="pref_auto_clear_cache_summary">لاتقم بمسح تلقائي لذاكرة التخزين</string>
+    <string name="pref_auto_delete_cache_notif_title">حذف التنبيهات المؤقتة تلقائياً</string>
+    <string name="pref_auto_delete_cache_notif_summary">عرض التنبيه عند حذف التنبيهات المؤقتة تلقائياً</string>
+    <string name="pref_exclusion_list_title">قائمة الإستثناء</string>
+    <string name="pref_exclusion_list_summary">إستثناء التطبيقات من عدم حذف الملفات المؤقتة</string>
+
+    <string name="pref_cat_auto_link">الربط التلقائي</string>
+    <string name="pref_auto_link_title">الربط التلقائي</string>
+    <string name="pref_auto_link_summary">الربط التلقائي للتطبيقات المتبثة حديثا ببطاقة الذاكرة</string>
+    <string name="pref_auto_link_settings_title">إعدادات الربط التلقائي</string>
+    <string name="pref_auto_link_settings_summary">ضبط خيارات الربط التلقائي لكل من ملفات ال apk، dex و lib</string>
+
+    <string name="pref_cat_apps2sd">الإعدادات البديهية لـ apps2SD</string>
+    <string name="pref_install_location_title">مكان التثبيت</string>
+    <string name="pref_install_location_summary">إختيار مكان تثبيت التطبيقات الجديدة</string>
+
+    <string name="pref_cat_about">حول Link2SD</string>
+    <string name="pref_about_title">حول Link2SD</string>
+    <string name="pref_whats_new_title">مالجديد ؟</string>
+    <string name="pref_send_email_title">Send email</string>
+    <string name="pref_send_email_summary">Send email to developer</string>
+
+    <string name="action_share">مشاركة</string>
+</resources>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Filter options -->
+    <string name="filter_all">الجميع</string>
+    <string name="filter_system">النظام</string>
+    <string name="filter_user">المستخدم</string>
+    <string name="filter_linked">مربوط(ة)</string>
+    <string name="filter_on_sdcard">في ذاكرة البطاقة</string>
+    <string name="filter_on_phone">في ذاكرة الهاتف</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="filter_frozen">مجمد(ة)</string>
+    <string name="filter_movable">قابل للنقل</string>
+    <string name="filter_updated">تم تحديثها</string>
+    <string name="filter_encrypted">مشفّر</string>
+
+    <!-- Sort options -->
+    <string name="sort_name">الإسم</string>
+    <string name="sort_date">التاريخ</string>
+    <string name="sort_apk_size">حجم Apk</string>
+    <string name="sort_lib_size">حجم Lib</string>
+    <string name="sort_dex_size">حجم Dex</string>
+    <string name="sort_data_total">حجم البيانات(المجموع)</string>
+    <string name="sort_data_phone">حجم البيانات (الهاتف)</string>
+    <string name="sort_data_external">حجم البيانات (الذاكرة الخارجية)</string>
+    <string name="sort_cache_size">حجم Cache</string>
+    <string name="sort_obb_size">Obb Size</string>
+    <string name="sort_apk_dex_lib">حجم Apk+Dex+Lib</string>
+    <string name="sort_total_size">الحجم الإجمالي</string>
+
+    <!-- Overflow (toolbar 3-dot) menu -->
+    <string name="menu_search">بحث</string>
+    <string name="menu_batch_select">الإختيار الجماعي</string>
+    <string name="menu_storage_info">معلومات الذاكرة</string>
+    <string name="menu_settings">الإعدادات</string>
+    <string name="menu_about">حول التطبيق</string>
+
+    <!-- Long-press context menu on an app item (matches the screenshots exactly) -->
+    <string name="ctx_move_to_sd">انقل إلى ذاكرة البطاقة</string>
+    <string name="ctx_move_to_phone">انقل إلى ذاكرة الهاتف</string>
+    <string name="ctx_run">تشغيل</string>
+    <string name="ctx_manage">إدارة</string>
+    <string name="ctx_reinstall">إعادة تثبيت</string>
+    <string name="ctx_delete">حذف</string>
+    <string name="ctx_freeze">تجميد</string>
+    <string name="ctx_unfreeze">إلغاء التجميد</string>
+    <string name="ctx_convert_system">تحويل إلى تطبيق للنظام</string>
+    <string name="ctx_clear_data">محو البيانات</string>
+    <string name="ctx_clear_cache">محو ذاكرة التخزين المؤقت</string>
+    <string name="ctx_view_play">View on Google Play</string>
+    <string name="ctx_share">مشاركة</string>
+    <string name="ctx_share_apk">مشاركة التطبيق</string>
+    <string name="ctx_create_shortcut">أنشئ اختصار</string>
+
+    <!-- Freeze backend chooser / status -->
+    <string name="freeze_choose_backend_title">تجميد باستخدام</string>
+    <string name="freeze_backend_shizuku">Shizuku</string>
+    <string name="freeze_backend_island">Island</string>
+    <string name="freeze_no_backend_title">لا يوجد مزود تجميد</string>
+    <string name="freeze_no_backend_message">التجميد بدون صلاحية Root يتطلب تثبيت Shizuku (وتفعيله) أو تثبيت Island (وتفعيل وضع Managed Mainland). ثبّت أحدهما ثم أعد المحاولة.</string>
+    <string name="freeze_shizuku_permission_denied">تم رفض صلاحية Shizuku</string>
+    <string name="freeze_island_permission_denied">تم رفض صلاحية Island</string>
+    <string name="freeze_failed">تعذّر تنفيذ العملية</string>
+    <string name="freeze_success_frozen">تم تجميد التطبيق</string>
+    <string name="freeze_success_unfrozen">تم إلغاء تجميد التطبيق</string>
+    <string name="settings_freeze_backend_title">مزود التجميد المفضل</string>
+
+    <!-- Toolbar extra -->
+    <string name="menu_filter">فلترة</string>
+    <string name="menu_sort">فرز</string>
+    <string name="app_name">Link2SD</string>
+    <string name="in_phone_memory_apps">في ذاكرة الهاتف تطبيقات (%1$d)</string>
+
+    <!-- Navigation drawer -->
+    <string name="nav_all_apps">جميع التطبيقات</string>
+    <string name="nav_on_sdcard">في ذاكرة البطاقة</string>
+    <string name="nav_on_phone">في ذاكرة الهاتف</string>
+    <string name="nav_frozen">مجمدة</string>
+    <string name="nav_favorites">المفضلة</string>
+    <string name="nav_section_tools">أدوات</string>
+
+    <!-- Storage info -->
+    <string name="storage_phone_memory">ذاكرة الهاتف</string>
+    <string name="storage_sd_memory">ذاكرة البطاقة</string>
+    <string name="row_sizes_format">apk:%1$s Dex:0.00B Lib:0.00B بيانات:%2$s المخبئ:%3$s الإجمالي:%4$s</string>
+</resources>

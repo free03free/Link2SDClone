@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Title (id/text ignored: MenuHelpers replaces it with the app's own
+         name + icon to reproduce the "app header" row seen at the top of
+         the popup in the screenshots) -->
+    <item android:id="@+id/ctx_header" android:title="" android:enabled="false" />
+
+    <!-- android:title is a static fallback; MenuHelpers.showAppContextMenu()
+         overwrites ctx_move_sd and ctx_freeze at runtime depending on the
+         app's current state (on SD vs on phone, frozen vs active). -->
+    <item android:id="@+id/ctx_move_sd" android:title="@string/ctx_move_to_sd" />
+    <item android:id="@+id/ctx_run" android:title="@string/ctx_run" />
+    <item android:id="@+id/ctx_manage" android:title="@string/ctx_manage" />
+    <item android:id="@+id/ctx_reinstall" android:title="@string/ctx_reinstall" />
+    <item android:id="@+id/ctx_delete" android:title="@string/ctx_delete" />
+    <item android:id="@+id/ctx_freeze" android:title="@string/ctx_freeze" />
+    <item android:id="@+id/ctx_convert_system" android:title="@string/ctx_convert_system" />
+    <item android:id="@+id/ctx_clear_data" android:title="@string/ctx_clear_data" />
+    <item android:id="@+id/ctx_clear_cache" android:title="@string/ctx_clear_cache" />
+    <item android:id="@+id/ctx_view_play" android:title="@string/ctx_view_play" />
+    <item android:id="@+id/ctx_share" android:title="@string/ctx_share" />
+    <item android:id="@+id/ctx_share_apk" android:title="@string/ctx_share_apk" />
+    <item android:id="@+id/ctx_create_shortcut" android:title="@string/ctx_create_shortcut" />
+
+</menu>

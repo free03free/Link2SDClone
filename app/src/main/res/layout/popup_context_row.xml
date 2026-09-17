@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/popup_row_title"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?attr/selectableItemBackground"
+    android:gravity="center"
+    android:paddingTop="13dp"
+    android:paddingBottom="13dp"
+    android:paddingStart="20dp"
+    android:paddingEnd="20dp"
+    android:textColor="@color/app_name_text"
+    android:textSize="15sp"
+    tools:text="تشغيل" />
