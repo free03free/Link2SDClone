@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_all_apps"
+            android:icon="@drawable/ic_apps"
+            android:title="@string/nav_all_apps" />
+        <item
+            android:id="@+id/nav_on_sdcard"
+            android:icon="@drawable/ic_sd_card"
+            android:title="@string/nav_on_sdcard" />
+        <item
+            android:id="@+id/nav_on_phone"
+            android:icon="@drawable/ic_phone_android"
+            android:title="@string/nav_on_phone" />
+        <item
+            android:id="@+id/nav_frozen"
+            android:icon="@drawable/ic_ac_unit"
+            android:title="@string/nav_frozen" />
+        <item
+            android:id="@+id/nav_favorites"
+            android:icon="@drawable/ic_star"
+            android:title="@string/nav_favorites" />
+    </group>
+
+    <item android:title="@string/nav_section_tools">
+        <menu>
+            <item
+                android:id="@+id/nav_storage_info"
+                android:icon="@drawable/ic_storage"
+                android:title="@string/menu_storage_info" />
+            <item
+                android:id="@+id/nav_settings"
+                android:icon="@drawable/ic_settings"
+                android:title="@string/menu_settings" />
+            <item
+                android:id="@+id/nav_about"
+                android:icon="@drawable/ic_info"
+                android:title="@string/menu_about" />
+        </menu>
+    </item>
+
+</menu>

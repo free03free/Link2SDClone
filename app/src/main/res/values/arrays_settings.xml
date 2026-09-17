@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="appearance_entries">
+        <item>فاتح</item>
+        <item>داكن</item>
+    </string-array>
+    <string-array name="appearance_values">
+        <item>light</item>
+        <item>dark</item>
+    </string-array>
+
+    <string-array name="language_entries">
+        <item>الافتراضية (Android OS)</item>
+        <item>العربية</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="language_values">
+        <item>default</item>
+        <item>ar</item>
+        <item>en</item>
+    </string-array>
+</resources>

@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <!-- Upgrade banner -->
+    <Preference
+        android:key="pref_upgrade_plus"
+        android:title="@string/pref_upgrade_title"
+        android:summary="@string/pref_upgrade_summary" />
+
+    <!-- عام -->
+    <PreferenceCategory android:title="@string/pref_cat_general">
+
+        <ListPreference
+            android:key="pref_appearance"
+            android:title="@string/pref_appearance_title"
+            android:entries="@array/appearance_entries"
+            android:entryValues="@array/appearance_values"
+            android:defaultValue="light" />
+
+        <ListPreference
+            android:key="pref_language"
+            android:title="@string/pref_language_title"
+            android:entries="@array/language_entries"
+            android:entryValues="@array/language_values"
+            android:defaultValue="default" />
+
+        <CheckBoxPreference
+            android:key="pref_relink_lib_boot"
+            android:title="@string/pref_relink_lib_boot_title"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="pref_relink_dex_boot"
+            android:title="@string/pref_relink_dex_boot_title"
+            android:summary="@string/pref_relink_dex_boot_summary"
+            android:defaultValue="true" />
+
+        <CheckBoxPreference
+            android:key="pref_bind_dirs_notification"
+            android:title="@string/pref_bind_dirs_notification_title"
+            android:summary="@string/pref_bind_dirs_notification_summary"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- محو ذاكرة التخزين المؤقت -->
+    <PreferenceCategory android:title="@string/pref_cat_clear_cache">
+
+        <Preference
+            android:key="pref_clear_cache_notif_size"
+            android:title="@string/pref_clear_cache_notif_size_title"
+            android:summary="5MB" />
+
+        <CheckBoxPreference
+            android:key="pref_clear_external_cache"
+            android:title="@string/pref_clear_external_cache_title"
+            android:defaultValue="true" />
+
+        <!-- PRO-only: shows the small red lock badge in Link2SD -->
+        <CheckBoxPreference
+            android:key="pref_auto_clear_cache"
+            android:title="@string/pref_auto_clear_cache_title"
+            android:summary="@string/pref_auto_clear_cache_summary"
+            android:enabled="false"
+            android:defaultValue="false" />
+
+        <CheckBoxPreference
+            android:key="pref_auto_delete_cache_notif"
+            android:title="@string/pref_auto_delete_cache_notif_title"
+            android:summary="@string/pref_auto_delete_cache_notif_summary"
+            android:defaultValue="true" />
+
+        <Preference
+            android:key="pref_exclusion_list"
+            android:title="@string/pref_exclusion_list_title"
+            android:summary="@string/pref_exclusion_list_summary" />
+
+    </PreferenceCategory>
+
+    <!-- الربط التلقائي -->
+    <PreferenceCategory android:title="@string/pref_cat_auto_link">
+
+        <CheckBoxPreference
+            android:key="pref_auto_link"
+            android:title="@string/pref_auto_link_title"
+            android:summary="@string/pref_auto_link_summary"
+            android:defaultValue="false" />
+
+        <Preference
+            android:key="pref_auto_link_settings"
+            android:title="@string/pref_auto_link_settings_title"
+            android:summary="@string/pref_auto_link_settings_summary" />
+
+        <CheckBoxPreference
+            android:key="pref_auto_link_notification"
+            android:title="Auto link notification"
+            android:summary="Display notification when newly installed app is linked"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <!-- الإعدادات البديهية لـ apps2SD -->
+    <PreferenceCategory android:title="@string/pref_cat_apps2sd">
+
+        <Preference
+            android:key="pref_install_location"
+            android:title="@string/pref_install_location_title"
+            android:summary="@string/pref_install_location_summary" />
+
+        <CheckBoxPreference
+            android:key="pref_app2sd_notification"
+            android:title="App2SD notification"
+            android:summary="Display notification when newly installed apps can be moved to the SD card"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <!-- حول Link2SD -->
+    <PreferenceCategory android:title="@string/pref_cat_about">
+
+        <Preference
+            android:key="pref_about"
+            android:title="@string/pref_about_title" />
+
+        <Preference
+            android:key="pref_whats_new"
+            android:title="@string/pref_whats_new_title" />
+
+        <Preference
+            android:key="pref_send_email"
+            android:title="@string/pref_send_email_title"
+            android:summary="@string/pref_send_email_summary" />
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

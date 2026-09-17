@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Filter drawer options -->
+    <string-array name="filter_options">
+        <item>@string/filter_all</item>
+        <item>@string/filter_system</item>
+        <item>@string/filter_user</item>
+        <item>@string/filter_linked</item>
+        <item>@string/filter_on_sdcard</item>
+        <item>@string/filter_on_phone</item>
+        <item>@string/filter_favorites</item>
+        <item>@string/filter_frozen</item>
+        <item>@string/filter_movable</item>
+        <item>@string/filter_updated</item>
+        <item>@string/filter_encrypted</item>
+    </string-array>
+
+    <!-- Sort drawer options -->
+    <string-array name="sort_options">
+        <item>@string/sort_name</item>
+        <item>@string/sort_date</item>
+        <item>@string/sort_apk_size</item>
+        <item>@string/sort_lib_size</item>
+        <item>@string/sort_dex_size</item>
+        <item>@string/sort_data_total</item>
+        <item>@string/sort_data_phone</item>
+        <item>@string/sort_data_external</item>
+        <item>@string/sort_cache_size</item>
+        <item>@string/sort_obb_size</item>
+        <item>@string/sort_apk_dex_lib</item>
+        <item>@string/sort_total_size</item>
+    </string-array>
+</resources>

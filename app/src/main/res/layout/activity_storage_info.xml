@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@android:color/white">
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_storage"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/colorPrimary"
+        app:navigationIcon="@drawable/ic_back"
+        app:title="@string/menu_storage_info"
+        app:titleTextAppearance="@style/ToolbarTitleText">
+
+        <ImageButton
+            android:id="@+id/icon_share"
+            style="?attr/borderlessButtonStyle"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="8dp"
+            android:src="@drawable/ic_share"
+            app:tint="@color/toolbar_icon"
+            android:contentDescription="@string/action_share" />
+
+    </androidx.appcompat.widget.Toolbar>
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <!-- 1. ذاكرة الهاتف /data -->
+            <include
+                android:id="@+id/storage_phone"
+                layout="@layout/item_storage_bar" />
+            <View style="@style/StorageDivider" />
+
+            <!-- 2. ذاكرة البطاقة /mnt/media_rw/... -->
+            <include
+                android:id="@+id/storage_sdcard"
+                layout="@layout/item_storage_bar" />
+            <View style="@style/StorageDivider" />
+
+            <!-- 3. النظام /system -->
+            <include
+                android:id="@+id/storage_system"
+                layout="@layout/item_storage_bar" />
+            <View style="@style/StorageDivider" />
+
+            <!-- 4. المخبئ /data/cache -->
+            <include
+                android:id="@+id/storage_cache"
+                layout="@layout/item_storage_bar" />
+
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

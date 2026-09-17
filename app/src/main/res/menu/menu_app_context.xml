@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <item android:id="@+id/ctx_reinstall" android:title="@string/ctx_reinstall" />
+    <item android:id="@+id/ctx_recreate_scripts" android:title="@string/ctx_recreate_scripts" />
+    <item android:id="@+id/ctx_relink_all_files" android:title="@string/ctx_relink_all_files" />
+    <item android:id="@+id/ctx_rebind_external_folders" android:title="@string/ctx_rebind_external_folders" />
+    <item android:id="@+id/ctx_relink_library_files" android:title="@string/ctx_relink_library_files" />
+    <item android:id="@+id/ctx_link_dalvik_cache" android:title="@string/ctx_link_dalvik_cache" />
+    <item android:id="@+id/ctx_clean_sd_partition" android:title="@string/ctx_clean_sd_partition" />
+    <item android:id="@+id/ctx_clean_dalvik_cache" android:title="@string/ctx_clean_dalvik_cache" />
+    <item android:id="@+id/ctx_clear_all_caches" android:title="@string/ctx_clear_all_caches" />
+    <item android:id="@+id/ctx_reboot" android:title="@string/ctx_reboot" />
+
+</menu>
