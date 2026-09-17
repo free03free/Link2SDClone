@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res/res-auto">
+
+    <item
+        android:id="@+id/action_storage_info"
+        android:title="@string/storage_info_title"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/action_filter_group"
+        android:title="@string/filter_title"
+        app:showAsAction="never">
+        <menu>
+            <item android:id="@+id/action_filter_all" android:title="@string/filter_all" />
+            <item android:id="@+id/action_filter_user" android:title="@string/filter_user_apps" />
+            <item android:id="@+id/action_filter_system" android:title="@string/filter_system_apps" />
+            <item android:id="@+id/action_filter_linked" android:title="@string/filter_linked" />
+            <item android:id="@+id/action_filter_not_linked" android:title="@string/filter_not_linked" />
+        </menu>
+    </item>
+
+    <item
+        android:id="@+id/action_settings"
+        android:title="@string/settings_title"
+        app:showAsAction="never" />
+
+</menu>

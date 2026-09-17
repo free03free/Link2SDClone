@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory android:title="@string/pref_category_linking">
+
+        <SwitchPreferenceCompat
+            android:key="pref_auto_link_new_apps"
+            android:title="@string/pref_auto_link_title"
+            android:summary="@string/pref_auto_link_summary"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_link_dalvik_cache"
+            android:title="@string/pref_link_dalvik_title"
+            android:summary="@string/pref_link_dalvik_summary"
+            android:defaultValue="false" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_link_apk"
+            android:title="@string/pref_link_apk_title"
+            android:summary="@string/pref_link_apk_summary"
+            android:defaultValue="true" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_link_data"
+            android:title="@string/pref_link_data_title"
+            android:summary="@string/pref_link_data_summary"
+            android:defaultValue="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_display">
+
+        <ListPreference
+            android:key="pref_default_sort"
+            android:title="@string/pref_default_sort_title"
+            android:entries="@array/sort_options_labels"
+            android:entryValues="@array/sort_options_values"
+            android:defaultValue="name" />
+
+        <SwitchPreferenceCompat
+            android:key="pref_show_system_apps"
+            android:title="@string/pref_show_system_title"
+            android:defaultValue="false" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_advanced">
+
+        <Preference
+            android:key="pref_backup_link_table"
+            android:title="@string/pref_backup_title"
+            android:summary="@string/pref_backup_summary" />
+
+        <Preference
+            android:key="pref_restore_link_table"
+            android:title="@string/pref_restore_title"
+            android:summary="@string/pref_restore_summary" />
+
+        <Preference
+            android:key="pref_root_check"
+            android:title="@string/pref_root_check_title"
+            android:summary="@string/pref_root_check_summary" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory android:title="@string/pref_category_about">
+        <Preference
+            android:key="pref_version"
+            android:title="@string/pref_version_title"
+            android:summary="1.0" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

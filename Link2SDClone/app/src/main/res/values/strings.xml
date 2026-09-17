@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">SD Link Manager</string>
+
+    <!-- عناوين الشاشات -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="storage_info_title">معلومات التخزين</string>
+    <string name="app_detail_title">تفاصيل التطبيق</string>
+    <string name="filter_title">فرز / فلترة</string>
+
+    <!-- فلاتر -->
+    <string name="filter_all">كل التطبيقات</string>
+    <string name="filter_user_apps">تطبيقات المستخدم</string>
+    <string name="filter_system_apps">تطبيقات النظام</string>
+    <string name="filter_linked">المرتبطة بالـ SD</string>
+    <string name="filter_not_linked">غير المرتبطة</string>
+
+    <!-- حالات الربط -->
+    <string name="status_not_linked">غير مرتبط</string>
+    <string name="status_linked_apk">مرتبط: APK فقط</string>
+    <string name="status_linked_data">مرتبط: البيانات فقط</string>
+    <string name="status_linked_dalvik">مرتبط: Dalvik Cache</string>
+    <string name="status_linked_all">مرتبط بالكامل</string>
+
+    <!-- إجراءات على التطبيق -->
+    <string name="action_create_link">إنشاء رابط (Create Link)</string>
+    <string name="action_remove_link">إزالة الرابط (Remove Link)</string>
+    <string name="action_move_to_sd">نقل إلى SD (Move to SD)</string>
+    <string name="action_app_info">تفاصيل التطبيق</string>
+    <string name="action_uninstall">إلغاء التثبيت</string>
+
+    <!-- رسائل -->
+    <string name="error_no_root">لا توجد صلاحيات Root على هذا الجهاز</string>
+    <string name="error_no_second_partition">لم يتم العثور على Partition ثانٍ على بطاقة SD</string>
+    <string name="link_success">تم إنشاء الرابط بنجاح</string>
+    <string name="unlink_success">تم إزالة الرابط بنجاح</string>
+    <string name="link_failed">فشلت العملية، تحقق من صلاحيات Root</string>
+    <string name="move_to_sd_hint">هذا الإجراء يتطلب دعم التطبيق لخاصية installLocation</string>
+    <string name="error_reading_storage">تعذر قراءة معلومات التخزين</string>
+    <string name="no_second_partition_found">لم يتم العثور على Partition ثانٍ</string>
+
+    <!-- تنسيقات -->
+    <string name="size_format">%1$d MB</string>
+    <string name="apps_count_format">%1$d تطبيق</string>
+    <string name="storage_format">%1$s: مستخدم %2$d MB من %3$d MB (متاح %4$d MB)</string>
+    <string name="internal_storage">الذاكرة الداخلية</string>
+    <string name="sd_storage">بطاقة SD</string>
+    <string name="second_partition">Partition الثاني (SD-Ext)</string>
+    <string name="app_detail_format">الاسم: %1$s\nالحزمة: %2$s\nالإصدار: %3$s\nحجم APK: %4$d MB\nحجم البيانات: %5$d MB</string>
+
+    <!-- الإعدادات -->
+    <string name="pref_category_linking">إعدادات الربط</string>
+    <string name="pref_auto_link_title">ربط تلقائي للتطبيقات الجديدة</string>
+    <string name="pref_auto_link_summary">إنشاء رابط SD تلقائياً بعد تثبيت أي تطبيق جديد</string>
+    <string name="pref_link_dalvik_title">ربط Dalvik Cache</string>
+    <string name="pref_link_dalvik_summary">نقل ذاكرة التخزين المؤقت للتطبيقات إلى SD</string>
+    <string name="pref_link_apk_title">ربط ملفات APK</string>
+    <string name="pref_link_apk_summary">نقل ملف التثبيت الأساسي إلى SD</string>
+    <string name="pref_link_data_title">ربط بيانات التطبيق</string>
+    <string name="pref_link_data_summary">نقل مجلد بيانات التطبيق (data) إلى SD</string>
+
+    <string name="pref_category_display">إعدادات العرض</string>
+    <string name="pref_default_sort_title">الفرز الافتراضي</string>
+    <string name="pref_show_system_title">إظهار تطبيقات النظام افتراضياً</string>
+
+    <string name="pref_category_advanced">إعدادات متقدمة</string>
+    <string name="pref_backup_title">نسخ احتياطي لجدول الروابط</string>
+    <string name="pref_backup_summary">حفظ قائمة التطبيقات المرتبطة حالياً</string>
+    <string name="pref_restore_title">استعادة جدول الروابط</string>
+    <string name="pref_restore_summary">استعادة الروابط من نسخة احتياطية سابقة</string>
+    <string name="pref_root_check_title">فحص صلاحيات Root</string>
+    <string name="pref_root_check_summary">التحقق من توفر صلاحيات root على الجهاز</string>
+
+    <string name="pref_category_about">حول التطبيق</string>
+    <string name="pref_version_title">الإصدار</string>
+
+</resources>
