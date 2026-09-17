@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">SD Link Manager</string>
 
     <!-- عناوين الشاشات -->
     <string name="settings_title">الإعدادات</string>
@@ -9,10 +8,8 @@
     <string name="filter_title">فرز / فلترة</string>
 
     <!-- فلاتر -->
-    <string name="filter_all">كل التطبيقات</string>
     <string name="filter_user_apps">تطبيقات المستخدم</string>
     <string name="filter_system_apps">تطبيقات النظام</string>
-    <string name="filter_linked">المرتبطة بالـ SD</string>
     <string name="filter_not_linked">غير المرتبطة</string>
 
     <!-- حالات الربط -->
@@ -50,8 +47,6 @@
 
     <!-- الإعدادات -->
     <string name="pref_category_linking">إعدادات الربط</string>
-    <string name="pref_auto_link_title">ربط تلقائي للتطبيقات الجديدة</string>
-    <string name="pref_auto_link_summary">إنشاء رابط SD تلقائياً بعد تثبيت أي تطبيق جديد</string>
     <string name="pref_link_dalvik_title">ربط Dalvik Cache</string>
     <string name="pref_link_dalvik_summary">نقل ذاكرة التخزين المؤقت للتطبيقات إلى SD</string>
     <string name="pref_link_apk_title">ربط ملفات APK</string>
