@@ -47,4 +47,9 @@ dependencies {
     // مكتبة libsu للتعامل مع صلاحيات Root وتنفيذ أوامر Shell
     implementation 'com.github.topjohnwu.libsu:core:5.2.2'
     implementation 'com.github.topjohnwu.libsu:io:5.2.2'
+
+    // مكتبة Shizuku API لتشغيل أوامر بصلاحيات مرتفعة بدون Root
+    implementation 'dev.rikka.shizuku:api:13.1.5'
+    implementation 'dev.rikka.shizuku:provider:13.1.5'
+
 }
