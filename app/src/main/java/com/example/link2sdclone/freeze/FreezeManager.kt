@@ -28,6 +28,12 @@ object FreezeManager {
     // both the missing-Toast bug and the "only last app freezes" bug.
     private val pendingIslandCallbacks = mutableListOf<(Boolean) -> Unit>()
     private val pendingShizukuCallbacks = mutableListOf<(Boolean) -> Unit>()
+
+    // Queued in FIFO order at the moment each Island freeze/unfreeze intent
+    // is actually sent. onActivityResult() drains one per result received,
+    // so batch operations route each Island outcome back to the correct
+    // package's original callback instead of losing it.
+    private val pendingIslandResultCallbacks = mutableListOf<(FreezeResult) -> Unit>()
     private var shizukuPermissionListener: Any? = null
 
     fun availableBackends(context: Context): List<FreezeBackend> = buildList {
@@ -86,8 +92,11 @@ object FreezeManager {
                             val sent = IslandFreezeBackend.requestFreeze(
                                 activity, packageName, freeze, FreezeRequestCodes.ISLAND_API_RESULT
                             )
-                            if (!sent) onFinalResult(FreezeResult.Failed("island_intent_failed"))
-                            // else: final Success/Failed comes from onActivityResult()
+                            if (sent) {
+                                pendingIslandResultCallbacks.add(onFinalResult)
+                            } else {
+                                onFinalResult(FreezeResult.Failed("island_intent_failed"))
+                            }
                         } else {
                             onFinalResult(FreezeResult.Failed("island_permission_denied"))
                         }
@@ -101,8 +110,11 @@ object FreezeManager {
                 val sent = IslandFreezeBackend.requestFreeze(
                     activity, packageName, freeze, FreezeRequestCodes.ISLAND_API_RESULT
                 )
-                if (!sent) onFinalResult(FreezeResult.Failed("island_intent_failed"))
-                // else: caller's onActivityResult() reports the real outcome.
+                if (sent) {
+                    pendingIslandResultCallbacks.add(onFinalResult)
+                } else {
+                    onFinalResult(FreezeResult.Failed("island_intent_failed"))
+                }
             }
         }
     }
@@ -138,10 +150,23 @@ object FreezeManager {
         }
     }
 
-    /** Call from Activity.onActivityResult() for Island's freeze/unfreeze result. */
-    fun onActivityResult(requestCode: Int, resultCode: Int, onIslandOutcome: (FreezeResult) -> Unit) {
+    /**
+     * Call from Activity.onActivityResult() for Island's freeze/unfreeze result.
+     * Drains one queued per-package callback (FIFO) if any are pending --
+     * this is what makes batch group operations attribute each Island
+     * result to the right package. onIslandOutcome is an optional fallback
+     * for callers that only ever handle one pending app at a time and don't
+     * queue through setFrozen's own onFinalResult (kept for compatibility).
+     */
+    fun onActivityResult(requestCode: Int, resultCode: Int, onIslandOutcome: ((FreezeResult) -> Unit)? = null) {
         if (requestCode == FreezeRequestCodes.ISLAND_API_RESULT) {
-            onIslandOutcome(if (resultCode == Activity.RESULT_OK) FreezeResult.Success else FreezeResult.Failed("island_denied_or_not_managed"))
+            val result = if (resultCode == Activity.RESULT_OK) FreezeResult.Success else FreezeResult.Failed("island_denied_or_not_managed")
+            if (pendingIslandResultCallbacks.isNotEmpty()) {
+                val callback = pendingIslandResultCallbacks.removeAt(0)
+                callback(result)
+            } else {
+                onIslandOutcome?.invoke(result)
+            }
         }
     }
 

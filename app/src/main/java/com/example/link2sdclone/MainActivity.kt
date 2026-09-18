@@ -160,7 +160,14 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     private fun loadInstalledApps() {
         val pm = packageManager
-        val installed = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        // MATCH_DISABLED_COMPONENTS is required here for the exact same reason
+        // as in GroupAppsActivity: without it, PackageManager silently drops
+        // disabled (frozen) apps, so the "مجمّدة" (frozen) filter in the nav
+        // drawer always showed an empty list even when apps were genuinely
+        // frozen at the system level.
+        val installed = pm.getInstalledApplications(
+            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
+        )
 
         val hasUsageAccess = StorageStatsHelper.hasUsageAccess(this)
 

@@ -46,6 +46,15 @@ class GroupsActivity : AppCompatActivity() {
         refreshList()
     }
 
+    // Required so Island's freeze/unfreeze result actually reaches
+    // FreezeManager -- without this override, Android drops the result
+    // silently and toggleGroupFreeze() never completes (no Toast, no
+    // guarantee the freeze even applied).
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        FreezeManager.onActivityResult(requestCode, resultCode)
+    }
+
     private fun refreshList() {
         val names = GroupsManager.listGroupNames(this)
         emptyView.visibility = if (names.isEmpty()) View.VISIBLE else View.GONE

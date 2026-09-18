@@ -63,6 +63,13 @@ class GroupAppsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_unfreeze_group).setOnClickListener { applyToGroup(freeze = false) }
     }
 
+    // Same reason as GroupsActivity: without this, Island's result for
+    // applyToGroup() is dropped and the batch never completes.
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        FreezeManager.onActivityResult(requestCode, resultCode)
+    }
+
     /** Only the filter categories that make sense from raw ApplicationInfo
      *  (no root, no favorites/recent-update tracking on this screen) --
      *  anything else falls back to "All" with a short explanation, same
