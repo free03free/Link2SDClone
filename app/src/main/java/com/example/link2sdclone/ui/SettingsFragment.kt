@@ -8,6 +8,7 @@ import androidx.preference.PreferenceFragmentCompat
 import com.example.link2sdclone.R
 import com.example.link2sdclone.freeze.FreezeBackend
 import com.example.link2sdclone.freeze.FreezeManager
+import com.example.link2sdclone.lock.LockSetupActivity
 
 /**
  * Settings screen — matches Link2SD's preference layout:
@@ -38,6 +39,11 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<Preference>("pref_auto_link_settings")?.setOnPreferenceClickListener {
             // TODO: open dialog with apk/dex/lib auto-link toggles
+            true
+        }
+
+        findPreference<Preference>("pref_app_lock")?.setOnPreferenceClickListener {
+            startActivity(android.content.Intent(requireContext(), LockSetupActivity::class.java))
             true
         }
 

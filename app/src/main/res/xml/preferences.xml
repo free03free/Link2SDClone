@@ -128,6 +128,16 @@
 
     </PreferenceCategory>
 
+    <!-- الأمان -->
+    <PreferenceCategory android:title="الأمان">
+
+        <Preference
+            android:key="pref_app_lock"
+            android:title="قفل التطبيق"
+            android:summary="حماية التطبيق برمز أو نمط أو بصمة الإصبع" />
+
+    </PreferenceCategory>
+
     <!-- حول Link2SD -->
     <PreferenceCategory android:title="@string/pref_cat_about">
 
