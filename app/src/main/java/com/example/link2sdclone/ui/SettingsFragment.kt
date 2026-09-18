@@ -1,6 +1,7 @@
 package com.example.link2sdclone.ui
 
 import android.os.Bundle
+import android.content.Context
 import androidx.preference.CheckBoxPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -9,6 +10,7 @@ import com.example.link2sdclone.R
 import com.example.link2sdclone.freeze.FreezeBackend
 import com.example.link2sdclone.freeze.FreezeManager
 import com.example.link2sdclone.lock.LockSetupActivity
+import com.example.link2sdclone.util.LocaleHelper
 
 /**
  * Settings screen — matches Link2SD's preference layout:
@@ -58,14 +60,22 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<Preference>("pref_send_email")?.setOnPreferenceClickListener {
-            // TODO: launch ACTION_SENDTO mailto intent
+            val intent = android.content.Intent(android.content.Intent.ACTION_SENDTO).apply {
+                data = android.net.Uri.parse("mailto:")
+            }
+            startActivity(android.content.Intent.createChooser(intent, null))
             true
         }
 
-        // "قم بمسح تلقائي لذاكرة التخزين" is a paid-only feature in Link2SD
-        // (shown disabled with a small red lock badge). Re-enable it here
-        // once you gate it behind your own purchase/pro check.
-        findPreference<CheckBoxPreference>("pref_auto_clear_cache")?.isEnabled = false
+        // "قم بمسح تلقائي لذاكرة التخزين" غير مفعّلة عمدًا -- مش بسبب الدفع.
+        // حتى بالنسخة الأصلية المدفوعة هاي الميزة تحتاج صلاحيات
+        // CLEAR_APP_CACHE / DELETE_CACHE_FILES وهي صلاحيات نظام لا يمنحها
+        // أندرويد لأي تطبيق طرف ثالث بدون Root، بغض النظر عن الدفع.
+        // تعطيلها هون صادق تقنيًا، مش قيد دفع مصطنع.
+        findPreference<CheckBoxPreference>("pref_auto_clear_cache")?.apply {
+            isEnabled = false
+            summary = "يتطلب صلاحية نظام (Root) غير متاحة لتطبيقات الطرف الثالث — حتى بالنسخة الأصلية المدفوعة"
+        }
 
         // "auto" (null) means: use whichever of Shizuku/Island is installed,
         // asking the user to pick if both are. Picking one here pins it.
@@ -75,6 +85,27 @@ class SettingsFragment : PreferenceFragmentCompat() {
                 "island" -> FreezeBackend.ISLAND
                 else -> null
             }
+            true
+        }
+
+        // المظهر: تطبيق فوري، القيمة تنحفظ تلقائيًا لأن ListPreference
+        // بيكتب على SharedPreferences قبل استدعاء هذا الـ listener.
+        findPreference<ListPreference>("pref_appearance")?.setOnPreferenceChangeListener { _, newValue ->
+            requireContext().getSharedPreferences(
+                androidx.preference.PreferenceManager.getDefaultSharedPreferencesName(requireContext()),
+                Context.MODE_PRIVATE
+            ).edit().putString("pref_appearance", newValue as String).apply()
+            LocaleHelper.applyTheme(requireContext())
+            true
+        }
+
+        // اللغة: تطبيق فوري + إعادة إنشاء الشاشة الحالية لتظهر النتيجة فورًا
+        findPreference<ListPreference>("pref_language")?.setOnPreferenceChangeListener { _, newValue ->
+            requireContext().getSharedPreferences(
+                androidx.preference.PreferenceManager.getDefaultSharedPreferencesName(requireContext()),
+                Context.MODE_PRIVATE
+            ).edit().putString("pref_language", newValue as String).apply()
+            LocaleHelper.applyLanguageAndRecreate(requireActivity())
             true
         }
     }

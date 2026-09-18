@@ -1,6 +1,7 @@
 package com.example.link2sdclone
 
 import android.Manifest
+import com.example.link2sdclone.util.LocaleHelper
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
