@@ -174,7 +174,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 apkPath = info.sourceDir,
                 icon = try { pm.getApplicationIcon(info) } catch (e: Exception) { null },
                 uid = info.uid,
-                apkSizeBytes = if (apkFile.exists()) apkFile.length() else 0L,
+                apkSizeBytes = realSizes?.appBytes ?: (if (apkFile.exists()) apkFile.length() else 0L),
                 dataSizeBytes = realSizes?.dataBytes ?: 0L,
                 cacheSizeBytes = realSizes?.cacheBytes ?: 0L,
                 hasRealSizes = realSizes != null,
@@ -190,17 +190,25 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     private fun applyFilterAndSort() {
-        // الترتيب يطابق filter_options: 0 الكل, 1 نظام, 2 مستخدم, 3 على SD,
-        // 4 داخلي, 5 مفضلة, 6 مجمّد, 7 محدّث مؤخرًا, 8 قابل للنقل (تقريبي)
+        // الترتيب يطابق filter_options الحقيقي بـ arrays_filter.xml (11 عنصر):
+        // 0 الكل,1 نظام,2 مستخدم,3 مرتبط,4 على SD,5 على الهاتف,
+        // 6 مفضلة,7 مجمّد,8 قابل للنقل,9 محدّث,10 مشفّر
+        if (currentFilterIndex == 3 || currentFilterIndex == 10) {
+            // "مرتبط" و"مشفّر": التطبيق ما عنده نظام ربط حقيقي ولا وصول لحالة
+            // التشفير بدون Root، فما فيه فلترة صحيحة نسويها -- بدل ما نعرض
+            // نتيجة غلط، منبّه المستخدم ونرجع لعرض الكل.
+            Toast.makeText(this, "هذا الفلتر يحتاج صلاحية Root وغير مدعوم حاليًا", Toast.LENGTH_SHORT).show()
+            currentFilterIndex = 0
+        }
         var list = when (currentFilterIndex) {
             1 -> allApps.filter { it.isSystemApp }
             2 -> allApps.filter { !it.isSystemApp }
-            3 -> allApps.filter { it.isOnSdCard }
-            4 -> allApps.filter { !it.isOnSdCard }
-            5 -> allApps.filter { it.isFavorite }
-            6 -> allApps.filter { it.isFrozen }
-            7 -> allApps.filter { it.isRecentlyUpdated }
-            8 -> allApps.filter { !it.isSystemApp } // تقريبي: تطبيقات المستخدم عادة قابلة للنقل
+            4 -> allApps.filter { it.isOnSdCard }
+            5 -> allApps.filter { !it.isOnSdCard }
+            6 -> allApps.filter { it.isFavorite }
+            7 -> allApps.filter { it.isFrozen }
+            8 -> allApps.filter { !it.isSystemApp } // تقريبي: قابل للنقل = تطبيق مستخدم عادةً
+            9 -> allApps.filter { it.isRecentlyUpdated }
             else -> allApps
         }
 
@@ -208,13 +216,22 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             list = list.filter { it.label.contains(searchQuery, ignoreCase = true) }
         }
 
-        // الترتيب يطابق sort_options: 0 الاسم, 1 التاريخ, 2 apk, 3 بيانات, 4 كاش, 5 إجمالي
+        // الترتيب يطابق sort_options الحقيقي بـ arrays_filter.xml (12 عنصر):
+        // 0 الاسم,1 التاريخ,2 apk,3 lib,4 dex,5 بيانات(إجمالي),6 بيانات(هاتف),
+        // 7 بيانات(خارجي),8 كاش,9 obb,10 apk+dex+lib,11 الإجمالي
+        //
+        // ملاحظة: StorageStatsManager يرجّع apkSizeBytes كرقم واحد مجمّع
+        // (apk+dex+lib سوا) وdataBytes كرقم واحد مجمّع (بدون تفريق هاتف/خارجي)،
+        // فما فيه طريقة رسمية بدون Root نفرّق فيها lib عن dex عن apk، ولا
+        // بيانات الهاتف عن الخارجية، ولا OBB. لهيك كل الخيارات المرتبطة
+        // بنفس الفئة بترجع لنفس القيمة الحقيقية الأقرب بدل ما تتجاهل الفرز.
         list = when (currentSortIndex) {
             1 -> list.sortedByDescending { maxOf(it.firstInstallTime, it.lastUpdateTime) }
-            2 -> list.sortedByDescending { it.apkSizeBytes }
-            3 -> list.sortedByDescending { it.dataSizeBytes }
-            4 -> list.sortedByDescending { it.cacheSizeBytes }
-            5 -> list.sortedByDescending { it.totalSizeBytes }
+            2, 3, 4, 10 -> list.sortedByDescending { it.apkSizeBytes }   // apk / lib / dex / apk+dex+lib
+            5, 6, 7 -> list.sortedByDescending { it.dataSizeBytes }      // بيانات إجمالي / هاتف / خارجي
+            8 -> list.sortedByDescending { it.cacheSizeBytes }
+            9 -> list                                                    // OBB: غير متاح، نسيب الترتيب الحالي
+            11 -> list.sortedByDescending { it.totalSizeBytes }
             else -> list.sortedBy { it.label.lowercase() }
         }
 

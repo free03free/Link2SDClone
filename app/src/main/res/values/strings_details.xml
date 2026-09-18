@@ -7,9 +7,6 @@
     <string name="usage_access_required_message">عشان نعرض حجم البيانات والكاش الحقيقي لكل تطبيق، لازم تفعّل صلاحية "الوصول لبيانات الاستخدام" لتطبيق SD Link Manager من إعدادات النظام.</string>
     <string name="grant_permission">منح الصلاحية</string>
     <string name="not_now">ليس الآن</string>
-
-    <string name="internal_storage">الهاتف</string>
-    <string name="sd_storage">SD</string>
     <string name="app_size_apk">apk</string>
     <string name="app_size_data">بيانات</string>
     <string name="app_size_cache">المخبأ</string>
@@ -23,27 +20,6 @@
     <string name="files_first_install">أول تثبيت</string>
     <string name="files_last_update">آخر تحديث</string>
     <string name="files_no_browser_notice">تصفح ملفات بيانات تطبيقات أخرى غير متاح بدون صلاحية Root. المعلومات أدناه هي كل ما يسمح نظام أندرويد بالوصول إليه لتطبيق طرف ثالث.</string>
-
-    <string-array name="filter_options">
-        <item>الكل</item>
-        <item>تطبيقات النظام</item>
-        <item>تطبيقات المستخدم</item>
-        <item>على SD</item>
-        <item>في الذاكرة الداخلية</item>
-        <item>المفضلة</item>
-        <item>مجمّد</item>
-        <item>محدّث مؤخرًا</item>
-        <item>قابل للنقل (تقريبي)</item>
-    </string-array>
-
-    <string-array name="sort_options">
-        <item>الاسم</item>
-        <item>تاريخ التثبيت/التحديث</item>
-        <item>حجم apk</item>
-        <item>حجم البيانات</item>
-        <item>حجم المخبأ (Cache)</item>
-        <item>الحجم الإجمالي</item>
-    </string-array>
 
     <string name="settings_theme">المظهر</string>
     <string name="settings_theme_summary">فاتح، غامق، أو حسب النظام</string>
