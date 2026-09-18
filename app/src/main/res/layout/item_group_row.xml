@@ -30,12 +30,10 @@
             android:layout_marginTop="2dp" />
     </LinearLayout>
 
-    <ImageButton
+    <com.google.android.material.materialswitch.MaterialSwitch
         android:id="@+id/group_toggle"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:src="@drawable/ic_power_toggle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:contentDescription="@string/group_toggle_desc" />
 
     <ImageButton

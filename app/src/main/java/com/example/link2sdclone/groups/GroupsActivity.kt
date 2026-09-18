@@ -1,6 +1,5 @@
 package com.example.link2sdclone.groups
 
-import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,12 +10,12 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.link2sdclone.R
 import com.example.link2sdclone.freeze.FreezeManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.google.android.material.materialswitch.MaterialSwitch
 
 class GroupsActivity : AppCompatActivity() {
 
@@ -138,7 +137,7 @@ class GroupsActivity : AppCompatActivity() {
         inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
             val name: TextView = view.findViewById(R.id.group_name)
             val count: TextView = view.findViewById(R.id.group_count)
-            val toggle: ImageButton = view.findViewById(R.id.group_toggle)
+            val toggle: MaterialSwitch = view.findViewById(R.id.group_toggle)
             val delete: ImageButton = view.findViewById(R.id.group_delete)
         }
 
@@ -153,15 +152,14 @@ class GroupsActivity : AppCompatActivity() {
             holder.name.text = name
             holder.count.text = getString(R.string.group_apps_count, count)
 
-            val allFrozen = GroupsManager.areAllFrozen(this@GroupsActivity, name)
-            val tintColor = if (allFrozen)
-                ContextCompat.getColor(this@GroupsActivity, R.color.colorAccent)
-            else
-                ContextCompat.getColor(this@GroupsActivity, android.R.color.darker_gray)
-            holder.toggle.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
+            // Clear the listener before setChecked() -- otherwise setting the
+            // switch's state here (to reflect actual frozen status) would
+            // itself fire onCheckedChanged and trigger a spurious toggle.
+            holder.toggle.setOnCheckedChangeListener(null)
+            holder.toggle.isChecked = GroupsManager.areAllFrozen(this@GroupsActivity, name)
+            holder.toggle.setOnCheckedChangeListener { _, _ -> onToggle(name) }
 
             holder.itemView.setOnClickListener { onOpen(name) }
-            holder.toggle.setOnClickListener { onToggle(name) }
             holder.delete.setOnClickListener { onDelete(name) }
         }
 

@@ -53,7 +53,7 @@ class GroupAppsActivity : AppCompatActivity() {
         applyFilter()
 
         findViewById<Button>(R.id.btn_filter_group).setOnClickListener {
-            showFilterDialog(this, currentFilterIndex) { index ->
+            showFilterDialog(this, currentFilterIndex, R.array.group_filter_options) { index ->
                 currentFilterIndex = index
                 applyFilter()
             }
@@ -81,6 +81,10 @@ class GroupAppsActivity : AppCompatActivity() {
             4 -> allInstalledApps.filter { it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/") }
             5 -> allInstalledApps.filter { !(it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/")) }
             7 -> allInstalledApps.filter { !it.enabled }
+            // Group-scoped: only apps that belong to THIS group's own
+            // package set (selected) and are currently frozen -- unlike
+            // index 7 above, this ignores every other app on the device.
+            11 -> allInstalledApps.filter { it.packageName in selected && !it.enabled }
             0 -> allInstalledApps
             else -> {
                 Toast.makeText(this, R.string.group_filter_unsupported, Toast.LENGTH_SHORT).show()

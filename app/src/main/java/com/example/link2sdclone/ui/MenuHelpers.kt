@@ -22,9 +22,10 @@ import com.example.link2sdclone.model.AppEntry
 fun showFilterDialog(
     context: Context,
     currentSelection: Int,
+    optionsArrayRes: Int = R.array.filter_options,
     onFilterSelected: (Int) -> Unit
 ) {
-    val options = context.resources.getStringArray(R.array.filter_options)
+    val options = context.resources.getStringArray(optionsArrayRes)
     AlertDialog.Builder(context)
         .setSingleChoiceItems(options, currentSelection) { dialog, which ->
             onFilterSelected(which)

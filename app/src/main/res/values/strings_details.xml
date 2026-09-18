@@ -35,6 +35,7 @@
     <string name="group_cancel">إلغاء</string>
     <string name="group_delete_confirm">حذف هذه المجموعة؟</string>
     <string name="group_apps_count">%d تطبيق</string>
+    <string name="filter_frozen_in_group">مجمّدة (هذه المجموعة)</string>
     <string name="group_freeze_all">تجميد المحدد</string>
     <string name="group_unfreeze_all">إلغاء تجميد المحدد</string>
     <string name="group_empty">لا توجد مجموعات بعد. اضغط + لإنشاء واحدة</string>

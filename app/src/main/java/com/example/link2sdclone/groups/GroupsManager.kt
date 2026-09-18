@@ -56,8 +56,19 @@ object GroupsManager {
         val pkgs = getPackages(context, groupName)
         if (pkgs.isEmpty()) return false
         val pm = context.packageManager
+        // MATCH_DISABLED_COMPONENTS is required here -- without it,
+        // getApplicationInfo() throws NameNotFoundException for a frozen
+        // (disabled) app, which the catch-block below silently turned into
+        // "not frozen". That made this function return false even when
+        // every app in the group WAS frozen, which in turn made
+        // toggleGroupFreeze() always compute freezeTarget = true -- the
+        // group toggle could freeze but never actually unfreeze.
         return pkgs.all { pkg ->
-            try { !pm.getApplicationInfo(pkg, 0).enabled } catch (e: Exception) { false }
+            try {
+                !pm.getApplicationInfo(pkg, android.content.pm.PackageManager.MATCH_DISABLED_COMPONENTS).enabled
+            } catch (e: Exception) {
+                false
+            }
         }
     }
 
