@@ -15,7 +15,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.link2sdclone.R
 import com.example.link2sdclone.freeze.FreezeManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import com.google.android.material.materialswitch.MaterialSwitch
+import androidx.appcompat.widget.SwitchCompat
 
 class GroupsActivity : AppCompatActivity() {
 
@@ -27,7 +27,10 @@ class GroupsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_groups)
 
         findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar_groups)
-            .setNavigationOnClickListener { finish() }
+            .apply {
+                subtitle = "build: switch-v2"
+                setNavigationOnClickListener { finish() }
+            }
 
         recyclerView = findViewById(R.id.groups_list)
         emptyView = findViewById(R.id.groups_empty)
@@ -137,7 +140,7 @@ class GroupsActivity : AppCompatActivity() {
         inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
             val name: TextView = view.findViewById(R.id.group_name)
             val count: TextView = view.findViewById(R.id.group_count)
-            val toggle: MaterialSwitch = view.findViewById(R.id.group_toggle)
+            val toggle: SwitchCompat = view.findViewById(R.id.group_toggle)
             val delete: ImageButton = view.findViewById(R.id.group_delete)
         }
 

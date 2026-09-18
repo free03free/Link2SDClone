@@ -31,10 +31,12 @@
             android:layout_marginTop="2dp" />
     </LinearLayout>
 
-    <com.google.android.material.materialswitch.MaterialSwitch
+    <androidx.appcompat.widget.SwitchCompat
         android:id="@+id/group_toggle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:minWidth="48dp"
+        android:minHeight="48dp"
         android:contentDescription="@string/group_toggle_desc"
         app:showText="false" />
 
