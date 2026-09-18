@@ -26,6 +26,7 @@
     </queries>
 
     <application
+        android:name=".Link2SDApp"
         android:allowBackup="true"
         android:icon="@drawable/ic_sd_card"
         android:roundIcon="@drawable/ic_sd_card"
@@ -52,6 +53,16 @@
             android:name=".ui.StorageInfoActivity"
             android:exported="false"
             android:label="@string/menu_storage_info" />
+
+        <activity
+            android:name=".lock.LockActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
+            android:name=".lock.LockSetupActivity"
+            android:exported="false"
+            android:label="قفل التطبيق" />
 
         <!-- Required so "Share app" (ctx_share_apk) can hand the APK file to
              other apps without exposing a file:// Uri (Android 7+ StrictMode). -->
