@@ -1,33 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string-array name="appearance_entries">
+    <string-array name="theme_entries">
+        <item>حسب النظام</item>
         <item>فاتح</item>
-        <item>داكن</item>
+        <item>غامق</item>
     </string-array>
-    <string-array name="appearance_values">
+    <string-array name="theme_values">
+        <item>system</item>
         <item>light</item>
         <item>dark</item>
-    </string-array>
-
-    <string-array name="language_entries">
-        <item>الافتراضية (Android OS)</item>
-        <item>العربية</item>
-        <item>English</item>
-    </string-array>
-    <string-array name="language_values">
-        <item>default</item>
-        <item>ar</item>
-        <item>en</item>
-    </string-array>
-
-    <string-array name="freeze_backend_entries">
-        <item>تلقائي (استخدم ما هو مثبت)</item>
-        <item>Shizuku</item>
-        <item>Island</item>
-    </string-array>
-    <string-array name="freeze_backend_values">
-        <item>auto</item>
-        <item>shizuku</item>
-        <item>island</item>
     </string-array>
 </resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="16dp">
+
+        <TextView
+            android:id="@+id/files_notice"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textSize="12sp"
+            android:textColor="@color/app_path_text"
+            android:text="@string/files_no_browser_notice"
+            android:layout_marginBottom="16dp" />
+
+        <TextView android:id="@+id/files_apk_path" style="@style/FileInfoRow" />
+        <TextView android:id="@+id/files_native_lib" style="@style/FileInfoRow" />
+        <TextView android:id="@+id/files_abi" style="@style/FileInfoRow" />
+        <TextView android:id="@+id/files_install_source" style="@style/FileInfoRow" />
+        <TextView android:id="@+id/files_first_install" style="@style/FileInfoRow" />
+        <TextView android:id="@+id/files_last_update" style="@style/FileInfoRow" />
+
+    </LinearLayout>
+</ScrollView>
