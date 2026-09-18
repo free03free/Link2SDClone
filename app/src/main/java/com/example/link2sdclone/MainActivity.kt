@@ -1,14 +1,19 @@
 package com.example.link2sdclone
 
+import android.Manifest
 import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.PopupMenu
 import android.widget.TextView
@@ -16,6 +21,8 @@ import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.Toolbar
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
@@ -28,6 +35,7 @@ import com.example.link2sdclone.freeze.FreezeBackend
 import com.example.link2sdclone.freeze.FreezeManager
 import com.example.link2sdclone.freeze.FreezeResult
 import com.example.link2sdclone.model.AppEntry
+import com.example.link2sdclone.ui.AppDetailsActivity
 import com.example.link2sdclone.ui.AppListAdapter
 import com.example.link2sdclone.ui.DrawerActions
 import com.example.link2sdclone.ui.OverflowActions
@@ -48,19 +56,24 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     private lateinit var toolbar: Toolbar
     private lateinit var toolbarSelection: Toolbar
     private lateinit var selectionCountText: TextView
+    private lateinit var toolbarSearch: Toolbar
+    private lateinit var searchInput: EditText
     private var allApps: List<AppEntry> = emptyList()
-    private var currentFilterIndex = 5   // "في ذاكرة الهاتف" to match your screenshots
+    private var currentFilterIndex = 5
     private var currentSortIndex = 0
 
-    // ---- Selection (batch) mode state ----
     private var isSelectionMode = false
     private val selectedPackages = mutableSetOf<String>()
+
+    private var isSearchMode = false
+    private var searchQuery: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         FreezeManager.registerShizukuListener(this)
+        requestNotificationPermissionIfNeeded()
 
         toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
@@ -73,6 +86,19 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         findViewById<ImageButton>(R.id.icon_select_none).setOnClickListener { selectNone() }
         findViewById<ImageButton>(R.id.icon_selection_overflow).setOnClickListener { showBatchActionsMenu(it) }
 
+        toolbarSearch = findViewById(R.id.toolbar_search)
+        searchInput = findViewById(R.id.search_input)
+        toolbarSearch.setNavigationOnClickListener { exitSearchMode() }
+        findViewById<ImageButton>(R.id.icon_search_clear).setOnClickListener { searchInput.setText("") }
+        searchInput.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                searchQuery = s?.toString().orEmpty()
+                applyFilterAndSort()
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navView = findViewById<NavigationView>(R.id.nav_view)
         toolbar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
@@ -83,7 +109,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         recyclerView.layoutManager = LinearLayoutManager(this)
         adapter = AppListAdapter(
             items = emptyList(),
-            onClick = { /* TODO: open app detail screen */ },
+            onClick = { app -> openAppDetails(app) },
             onLongClick = { app, view -> showAppContextMenu(this, view, app) { actionId -> onContextAction(app, actionId) } },
             onFavoriteClick = { app -> toggleFavorite(app) },
             onSelectToggle = { app -> toggleSelection(app) }
@@ -112,10 +138,20 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     override fun onBackPressed() {
-        if (isSelectionMode) {
-            exitSelectionMode()
-        } else {
-            super.onBackPressed()
+        when {
+            isSelectionMode -> exitSelectionMode()
+            isSearchMode -> exitSearchMode()
+            else -> super.onBackPressed()
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                ActivityCompat.requestPermissions(this, arrayOf(Manifest.permission.POST_NOTIFICATIONS), 9001)
+            }
         }
     }
 
@@ -156,6 +192,10 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             else -> allApps
         }
 
+        if (searchQuery.isNotBlank()) {
+            list = list.filter { it.label.contains(searchQuery, ignoreCase = true) }
+        }
+
         list = when (currentSortIndex) {
             1 -> list
             2 -> list.sortedByDescending { it.apkSizeBytes }
@@ -169,6 +209,32 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     private fun toggleFavorite(app: AppEntry) {
         app.isFavorite = !app.isFavorite
+        applyFilterAndSort()
+    }
+
+    private fun openAppDetails(app: AppEntry) {
+        startActivity(Intent(this, AppDetailsActivity::class.java).apply {
+            putExtra(AppDetailsActivity.EXTRA_PACKAGE_NAME, app.packageName)
+        })
+    }
+
+    // ---------------------------------------------------------------------
+    // Search mode
+    // ---------------------------------------------------------------------
+
+    private fun enterSearchMode() {
+        isSearchMode = true
+        toolbar.visibility = View.GONE
+        toolbarSearch.visibility = View.VISIBLE
+        searchInput.requestFocus()
+    }
+
+    private fun exitSearchMode() {
+        isSearchMode = false
+        searchQuery = ""
+        searchInput.setText("")
+        toolbarSearch.visibility = View.GONE
+        toolbar.visibility = View.VISIBLE
         applyFilterAndSort()
     }
 
@@ -451,7 +517,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         handleOverflowMenuClick(item, this) || super.onOptionsItemSelected(item)
 
     // ---- OverflowActions ----
-    override fun onSearch() { /* TODO: show SearchView over the toolbar */ }
+    override fun onSearch() { enterSearchMode() }
     override fun onBatchSelect() { enterSelectionMode() }
     override fun onStorageInfo() {
         startActivity(Intent(this, StorageInfoActivity::class.java))
@@ -459,7 +525,16 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     override fun onSettings() {
         startActivity(Intent(this, SettingsActivity::class.java))
     }
-    override fun onAbout() { /* TODO: show About dialog */ }
+    override fun onAbout() {
+        val versionName = try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "1.0"
+        } catch (e: Exception) { "1.0" }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.app_name)
+            .setMessage(getString(R.string.about_message, versionName))
+            .setPositiveButton(android.R.string.ok, null)
+            .show()
+    }
 
     // ---- DrawerActions ----
     override fun onAllApps() { currentFilterIndex = 0; applyFilterAndSort() }

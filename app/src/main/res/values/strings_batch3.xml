@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_message">SD Link Manager\nالإصدار %1$s\n\nتطبيق لإدارة التطبيقات المثبتة، تجميدها، وعرض معلومات التخزين.</string>
+    <string name="search_hint">بحث عن تطبيق…</string>
+    <string name="notify_channel_name">تطبيقات جديدة</string>
+    <string name="notify_channel_desc">تنبيه عند تثبيت تطبيق جديد على الجهاز</string>
+    <string name="notify_new_app_title">تم تثبيت تطبيق جديد</string>
+    <string name="notify_new_app_text">اضغط لإدارة %1$s</string>
+</resources>

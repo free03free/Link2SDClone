@@ -2,21 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Needed to enumerate every installed app (Android 11+) -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
-
-    <!-- Island's public "freeze/unfreeze" API is a normal dangerous permission,
-         requested at runtime the same way as e.g. CAMERA. -->
     <uses-permission android:name="com.oasisfeng.island.permission.FREEZE_PACKAGE" />
     <uses-permission android:name="com.oasisfeng.island.permission.LAUNCH_PACKAGE" />
-
-    <!-- Only used as a fallback signal; harmless to declare even if Shizuku
-         itself doesn't require a manifest permission for its own API. -->
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <queries>
-        <!-- Let us detect + talk to Shizuku and Island even on Android 11+ -->
         <package android:name="moe.shizuku.privileged.api" />
         <package android:name="com.oasisfeng.island" />
         <package android:name="com.oasisfeng.island.fdroid" />
@@ -55,6 +48,11 @@
             android:label="@string/menu_storage_info" />
 
         <activity
+            android:name=".ui.AppDetailsActivity"
+            android:exported="false"
+            android:theme="@style/AppTheme.NoActionBar" />
+
+        <activity
             android:name=".lock.LockActivity"
             android:exported="false"
             android:theme="@style/AppTheme.NoActionBar" />
@@ -63,6 +61,15 @@
             android:name=".lock.LockSetupActivity"
             android:exported="false"
             android:label="قفل التطبيق" />
+
+        <receiver
+            android:name=".receiver.PackageInstallReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.PACKAGE_ADDED" />
+                <data android:scheme="package" />
+            </intent-filter>
+        </receiver>
 
         <!-- Required so "Share app" (ctx_share_apk) can hand the APK file to
              other apps without exposing a file:// Uri (Android 7+ StrictMode). -->
@@ -78,7 +85,5 @@
 
         <!-- rikka.shizuku:shizuku-provider merges its own <provider> entry
              automatically from its AAR manifest — nothing to add here. -->
-
     </application>
-
 </manifest>

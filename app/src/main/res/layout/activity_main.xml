@@ -5,7 +5,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Main content: toolbar + app list -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -13,6 +12,7 @@
 
         <include layout="@layout/toolbar_main" />
         <include layout="@layout/toolbar_selection" />
+        <include layout="@layout/toolbar_search" />
 
         <TextView
             android:id="@+id/list_header_count"
@@ -31,7 +31,6 @@
 
     </LinearLayout>
 
-    <!-- Drawer -->
     <com.google.android.material.navigation.NavigationView
         android:id="@+id/nav_view"
         android:layout_width="wrap_content"
