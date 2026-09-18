@@ -39,8 +39,14 @@ class GroupAppsActivity : AppCompatActivity() {
         }
 
         val pm = packageManager
-        allInstalledApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
-            .sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
+        // MATCH_DISABLED_COMPONENTS is required here so apps the user has
+        // frozen (disabled at the system level) still show up in this list --
+        // without it, PackageManager silently drops disabled apps, which made
+        // apps the user had just selected/frozen for a group vanish entirely
+        // the next time this screen opened.
+        allInstalledApps = pm.getInstalledApplications(
+            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
+        ).sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
 
         recyclerView = findViewById(R.id.group_apps_list)
         recyclerView.layoutManager = LinearLayoutManager(this)

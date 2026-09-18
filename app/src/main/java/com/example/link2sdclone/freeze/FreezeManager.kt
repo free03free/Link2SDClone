@@ -50,8 +50,7 @@ object FreezeManager {
                 if (!ShizukuFreezeBackend.hasPermission()) {
                     pendingShizukuCallback = { granted ->
                         if (granted) {
-                            val ok = ShizukuFreezeBackend.setAppEnabled(packageName, enabled = !freeze)
-                            onFinalResult(if (ok) FreezeResult.Success else FreezeResult.Failed("shizuku_call_failed"))
+                            onFinalResult(performShizukuFreeze(activity, packageName, freeze))
                         } else {
                             onFinalResult(FreezeResult.Failed("shizuku_permission_denied"))
                         }
@@ -60,8 +59,7 @@ object FreezeManager {
                     onFinalResult(FreezeResult.PermissionRequested)
                     return
                 }
-                val ok = ShizukuFreezeBackend.setAppEnabled(packageName, enabled = !freeze)
-                onFinalResult(if (ok) FreezeResult.Success else FreezeResult.Failed("shizuku_call_failed"))
+                onFinalResult(performShizukuFreeze(activity, packageName, freeze))
             }
 
             FreezeBackend.ISLAND -> {
@@ -91,6 +89,25 @@ object FreezeManager {
                 // else: caller's onActivityResult() reports the real outcome.
             }
         }
+    }
+
+    /**
+     * Calls the reflection-based Shizuku disable/enable call, then re-reads
+     * the REAL system state via PackageManager to confirm it actually
+     * changed -- setAppEnabled() returning true only means the binder call
+     * didn't throw, not that Android actually applied it (e.g. silent
+     * SELinux denial). Without this check the UI could show "frozen" for
+     * an app that was never really touched, which reverts the moment the
+     * app re-reads real state (e.g. on next launch) -- exactly the ghost
+     * freeze bug this fixes.
+     */
+    private fun performShizukuFreeze(context: Context, packageName: String, freeze: Boolean): FreezeResult {
+        val ok = ShizukuFreezeBackend.setAppEnabled(packageName, enabled = !freeze)
+        if (!ok) return FreezeResult.Failed("shizuku_call_failed")
+        val nowEnabled = ShizukuFreezeBackend.isAppEnabled(context, packageName)
+        val expectedEnabled = !freeze
+        return if (nowEnabled == expectedEnabled) FreezeResult.Success
+        else FreezeResult.Failed("shizuku_verify_failed")
     }
 
     // ---- Activity lifecycle plumbing ----
