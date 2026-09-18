@@ -32,9 +32,7 @@ class Link2SDApp : Application() {
                 val sw = StringWriter()
                 throwable.printStackTrace(PrintWriter(sw))
                 val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
-                val entry = "
-===== CRASH at $timestamp (thread: ${thread.name}) =====
-$sw"
+                val entry = "\n===== CRASH at $timestamp (thread: ${thread.name}) =====\n$sw"
                 val file = File(getExternalFilesDir(null), "crash_log.txt")
                 file.appendText(entry)
             } catch (e: Exception) {
