@@ -8,7 +8,9 @@ import android.os.Bundle
 import android.provider.Settings
 import android.view.Menu
 import android.view.MenuItem
+import android.view.View
 import android.widget.ImageButton
+import android.widget.PopupMenu
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -43,21 +45,33 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     private lateinit var adapter: AppListAdapter
     private lateinit var headerCount: TextView
+    private lateinit var toolbar: Toolbar
+    private lateinit var toolbarSelection: Toolbar
+    private lateinit var selectionCountText: TextView
     private var allApps: List<AppEntry> = emptyList()
     private var currentFilterIndex = 5   // "في ذاكرة الهاتف" to match your screenshots
     private var currentSortIndex = 0
+
+    // ---- Selection (batch) mode state ----
+    private var isSelectionMode = false
+    private val selectedPackages = mutableSetOf<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Freeze feature: Shizuku reports its permission result through this
-        // listener rather than (only) onRequestPermissionsResult.
         FreezeManager.registerShizukuListener(this)
 
-        val toolbar = findViewById<Toolbar>(R.id.toolbar)
+        toolbar = findViewById(R.id.toolbar)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayShowTitleEnabled(false)
+
+        toolbarSelection = findViewById(R.id.toolbar_selection)
+        selectionCountText = findViewById(R.id.selection_count)
+        toolbarSelection.setNavigationOnClickListener { exitSelectionMode() }
+        findViewById<ImageButton>(R.id.icon_select_all).setOnClickListener { selectAll() }
+        findViewById<ImageButton>(R.id.icon_select_none).setOnClickListener { selectNone() }
+        findViewById<ImageButton>(R.id.icon_selection_overflow).setOnClickListener { showBatchActionsMenu(it) }
 
         val drawerLayout = findViewById<DrawerLayout>(R.id.drawer_layout)
         val navView = findViewById<NavigationView>(R.id.nav_view)
@@ -71,7 +85,8 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             items = emptyList(),
             onClick = { /* TODO: open app detail screen */ },
             onLongClick = { app, view -> showAppContextMenu(this, view, app) { actionId -> onContextAction(app, actionId) } },
-            onFavoriteClick = { app -> toggleFavorite(app) }
+            onFavoriteClick = { app -> toggleFavorite(app) },
+            onSelectToggle = { app -> toggleSelection(app) }
         )
         recyclerView.adapter = adapter
 
@@ -96,6 +111,14 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         super.onDestroy()
     }
 
+    override fun onBackPressed() {
+        if (isSelectionMode) {
+            exitSelectionMode()
+        } else {
+            super.onBackPressed()
+        }
+    }
+
     private fun loadInstalledApps() {
         val pm = packageManager
         val installed = pm.getInstalledApplications(PackageManager.GET_META_DATA)
@@ -110,7 +133,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 apkPath = info.sourceDir,
                 icon = try { pm.getApplicationIcon(info) } catch (e: Exception) { null },
                 apkSizeBytes = if (apkFile.exists()) apkFile.length() else 0L,
-                dataSizeBytes = 0L,  // requires PackageStats / StorageStatsManager (API 26+) with usage-access
+                dataSizeBytes = 0L,
                 cacheSizeBytes = 0L,
                 isSystemApp = isSystem,
                 isOnSdCard = info.sourceDir.contains("/mnt/") || info.sourceDir.contains("/storage/"),
@@ -134,7 +157,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         }
 
         list = when (currentSortIndex) {
-            1 -> list  // date: needs PackageInfo.firstInstallTime
+            1 -> list
             2 -> list.sortedByDescending { it.apkSizeBytes }
             11 -> list.sortedByDescending { it.totalSizeBytes }
             else -> list.sortedBy { it.label.lowercase() }
@@ -150,14 +173,106 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     // ---------------------------------------------------------------------
+    // Selection (batch) mode
+    // ---------------------------------------------------------------------
+
+    private fun enterSelectionMode(initialApp: AppEntry? = null) {
+        isSelectionMode = true
+        selectedPackages.clear()
+        initialApp?.let { selectedPackages.add(it.packageName) }
+        adapter.setSelectionMode(true)
+        adapter.setSelectedPackages(selectedPackages.toSet())
+        updateSelectionUi()
+        toolbar.visibility = View.GONE
+        toolbarSelection.visibility = View.VISIBLE
+    }
+
+    private fun exitSelectionMode() {
+        isSelectionMode = false
+        selectedPackages.clear()
+        adapter.setSelectionMode(false)
+        adapter.setSelectedPackages(emptySet())
+        toolbarSelection.visibility = View.GONE
+        toolbar.visibility = View.VISIBLE
+    }
+
+    private fun toggleSelection(app: AppEntry) {
+        if (selectedPackages.contains(app.packageName)) {
+            selectedPackages.remove(app.packageName)
+        } else {
+            selectedPackages.add(app.packageName)
+        }
+        adapter.setSelectedPackages(selectedPackages.toSet())
+        updateSelectionUi()
+    }
+
+    private fun selectAll() {
+        selectedPackages.clear()
+        selectedPackages.addAll(adapter.currentItems().map { it.packageName })
+        adapter.setSelectedPackages(selectedPackages.toSet())
+        updateSelectionUi()
+    }
+
+    private fun selectNone() {
+        selectedPackages.clear()
+        adapter.setSelectedPackages(emptySet())
+        updateSelectionUi()
+    }
+
+    private fun updateSelectionUi() {
+        selectionCountText.text = selectedPackages.size.toString()
+    }
+
+    private fun showBatchActionsMenu(anchor: View) {
+        val popup = PopupMenu(this, anchor)
+        popup.menuInflater.inflate(R.menu.menu_batch_actions, popup.menu)
+        popup.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.batch_freeze -> { batchSetFrozen(true); true }
+                R.id.batch_unfreeze -> { batchSetFrozen(false); true }
+                else -> false
+            }
+        }
+        popup.show()
+    }
+
+    private fun batchSetFrozen(target: Boolean) {
+        if (selectedPackages.isEmpty()) {
+            Toast.makeText(this, R.string.batch_no_selection, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val backends = FreezeManager.availableBackends(this)
+        if (backends.isEmpty()) {
+            showNoFreezeBackendDialog()
+            return
+        }
+        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
+        val targets = allApps.filter { it.packageName in selectedPackages }
+        var remaining = targets.size
+        if (remaining == 0) return
+
+        targets.forEach { app ->
+            FreezeManager.setFrozen(this, backend, app.packageName, target) { result ->
+                runOnUiThread {
+                    if (result is FreezeResult.Success) app.isFrozen = target
+                    remaining--
+                    if (remaining == 0) {
+                        applyFilterAndSort()
+                        exitSelectionMode()
+                        Toast.makeText(this, R.string.batch_action_done, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
     // Long-press context menu actions
     // ---------------------------------------------------------------------
 
     private fun onContextAction(app: AppEntry, actionId: Int) {
         when (actionId) {
             R.id.ctx_move_sd -> {
-                // TODO: real Link2SD-style move needs root (bind-mount) — without
-                // root there's no public API to relocate another app's APK/data.
                 Toast.makeText(this, "TODO: move ${app.packageName}", Toast.LENGTH_SHORT).show()
             }
             R.id.ctx_run -> {
@@ -167,8 +282,6 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             }
             R.id.ctx_manage -> openAppInfoScreen(app.packageName)
             R.id.ctx_reinstall -> {
-                // Re-triggers install from the same APK path (works for sideloaded APKs
-                // still on disk; Play-installed apps should instead deep-link to the Store).
                 try {
                     val apkUri = FileProvider.getUriForFile(this, "$packageName.fileprovider", File(app.apkPath))
                     val installIntent = Intent(Intent.ACTION_VIEW).apply {
@@ -186,11 +299,10 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             }
             R.id.ctx_freeze -> handleFreezeToggle(app)
             R.id.ctx_convert_system -> {
-                // Requires root (mount /system rw + `pm` remount) — not possible via any public API.
                 Toast.makeText(this, "يتطلب صلاحية Root", Toast.LENGTH_SHORT).show()
             }
-            R.id.ctx_clear_data -> openAppInfoScreen(app.packageName) // no public API to clear another app's data
-            R.id.ctx_clear_cache -> openAppInfoScreen(app.packageName) // same restriction as clear data
+            R.id.ctx_clear_data -> openAppInfoScreen(app.packageName)
+            R.id.ctx_clear_cache -> openAppInfoScreen(app.packageName)
             R.id.ctx_view_play -> {
                 try {
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${app.packageName}")))
@@ -254,8 +366,6 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     // Freeze (Shizuku / Island)
     // ---------------------------------------------------------------------
 
-    /** Package name we're mid-freeze-toggle for, needed once Island's
-     *  onActivityResult comes back (it only gives us a result code, not the package). */
     private var pendingFreezeTarget: AppEntry? = null
 
     private fun handleFreezeToggle(app: AppEntry) {
@@ -264,7 +374,6 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             backends.isEmpty() -> showNoFreezeBackendDialog()
             backends.size == 1 -> startFreeze(app, backends.first())
             else -> {
-                // Both installed: honor a saved preference, else ask once.
                 val saved = FreezeManager.preferredBackend
                 if (saved != null && saved in backends) startFreeze(app, saved)
                 else showChooseBackendDialog(app, backends)
@@ -343,7 +452,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     // ---- OverflowActions ----
     override fun onSearch() { /* TODO: show SearchView over the toolbar */ }
-    override fun onBatchSelect() { /* TODO: enable multi-select mode on the adapter */ }
+    override fun onBatchSelect() { enterSelectionMode() }
     override fun onStorageInfo() {
         startActivity(Intent(this, StorageInfoActivity::class.java))
     }

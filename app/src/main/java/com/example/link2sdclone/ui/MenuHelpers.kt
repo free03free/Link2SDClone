@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.PopupWindow
+import android.widget.ScrollView
 import android.widget.TextView
 import com.example.link2sdclone.R
 import com.example.link2sdclone.model.AppEntry
@@ -17,9 +18,6 @@ import com.example.link2sdclone.model.AppEntry
 /**
  * Shows the "Filter" single-choice dialog, exactly like Link2SD's filter drawer
  * (list of RadioButtons, one selected at a time).
- *
- * @param currentSelection index of the currently active filter
- * @param onFilterSelected callback fired with the chosen index; dialog closes automatically
  */
 fun showFilterDialog(
     context: Context,
@@ -54,7 +52,6 @@ fun showSortDialog(
 
 /**
  * Inflates the toolbar overflow (3-dot) menu and routes clicks.
- * Call this from onCreateOptionsMenu(menu: Menu) in your Activity.
  */
 fun inflateOverflowMenu(menu: Menu, context: Context) {
     context.let {
@@ -64,7 +61,6 @@ fun inflateOverflowMenu(menu: Menu, context: Context) {
 
 /**
  * Call from onOptionsItemSelected(item: MenuItem) in your Activity.
- * Returns true if the click was handled.
  */
 fun handleOverflowMenuClick(item: MenuItem, actions: OverflowActions): Boolean {
     return when (item.itemId) {
@@ -86,15 +82,12 @@ interface OverflowActions {
 }
 
 /**
- * Shows the long-press context menu on an app row: an app-name header
- * followed by a plain vertical list of actions, exactly matching the
- * screenshots (Move to SD / Run / Manage / Reinstall / Delete / Freeze /
- * Convert to system app / Clear data / Clear cache / View on Google Play /
- * Share / Share app / Create shortcut).
+ * Shows the long-press context menu on an app row.
  *
- * A plain PopupMenu can't relabel "Move to SD" vs "Move to phone" or
- * "Freeze" vs "Unfreeze" per row, so this builds a small custom PopupWindow
- * instead, using the ids declared in res/menu/menu_app_context.xml.
+ * FIX: the row list is now wrapped in a ScrollView, and the popup's height
+ * is capped at min(actual content height, 65% of screen height). Short
+ * lists still show at their natural (wrap_content) size; long lists become
+ * scrollable instead of getting cut off / unreachable at the bottom.
  */
 fun showAppContextMenu(
     context: Context,
@@ -120,15 +113,7 @@ fun showAppContextMenu(
     }
     container.addView(divider)
 
-    val popupWindow = PopupWindow(
-        container,
-        (anchorView.resources.displayMetrics.widthPixels * 0.72f).toInt(),
-        ViewGroup.LayoutParams.WRAP_CONTENT,
-        true
-    ).apply {
-        isOutsideTouchable = true
-        setBackgroundDrawable(ColorDrawable(0))
-    }
+    lateinit var popupWindow: PopupWindow
 
     fun addRow(id: Int, title: String) {
         val row = inflater.inflate(R.layout.popup_context_row, container, false) as TextView
@@ -161,6 +146,32 @@ fun showAppContextMenu(
     addRow(R.id.ctx_share, res.getString(R.string.ctx_share))
     addRow(R.id.ctx_share_apk, res.getString(R.string.ctx_share_apk))
     addRow(R.id.ctx_create_shortcut, res.getString(R.string.ctx_create_shortcut))
+
+    val popupWidth = (anchorView.resources.displayMetrics.widthPixels * 0.72f).toInt()
+
+    // Measure the real (unbounded) content height first.
+    container.measure(
+        View.MeasureSpec.makeMeasureSpec(popupWidth, View.MeasureSpec.EXACTLY),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+    )
+    val contentHeight = container.measuredHeight
+    val maxHeight = (anchorView.resources.displayMetrics.heightPixels * 0.65f).toInt()
+    val popupHeight = minOf(contentHeight, maxHeight)
+
+    val scrollView = ScrollView(context).apply {
+        isFillViewport = false
+        addView(container, ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+    }
+
+    popupWindow = PopupWindow(
+        scrollView,
+        popupWidth,
+        popupHeight,
+        true
+    ).apply {
+        isOutsideTouchable = true
+        setBackgroundDrawable(ColorDrawable(0))
+    }
 
     popupWindow.showAsDropDown(anchorView, 0, -anchorView.height)
 }

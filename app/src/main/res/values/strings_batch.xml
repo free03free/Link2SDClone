@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="batch_freeze">تجميد المحدد</string>
+    <string name="batch_unfreeze">إلغاء تجميد المحدد</string>
+    <string name="batch_action_done">تم تنفيذ العملية على التطبيقات المحددة</string>
+    <string name="batch_no_selection">لم يتم تحديد أي تطبيق</string>
+</resources>

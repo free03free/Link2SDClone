@@ -12,6 +12,7 @@
         android:orientation="vertical">
 
         <include layout="@layout/toolbar_main" />
+        <include layout="@layout/toolbar_selection" />
 
         <TextView
             android:id="@+id/list_header_count"
