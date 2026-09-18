@@ -21,3 +21,6 @@ app/release/
 .idea/workspace.xml
 .idea/navEditor.xml
 .idea/assetWizardSettings.xml
+backup_before_ic_phone/
+*.bak
+*.bak2
