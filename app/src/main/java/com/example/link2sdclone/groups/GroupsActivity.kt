@@ -73,11 +73,8 @@ class GroupsActivity : AppCompatActivity() {
         )
     }
 
-    /** Freezes every app in the group if any is currently unfrozen; if the
-     *  whole group is already frozen, unfreezes it instead. No need to open
-     *  the group screen for this. */
-    private fun toggleGroupFreeze(name: String) {
-        val packages = GroupsManager.getPackages(this, name)
+        private fun toggleGroupFreeze(name: String) {
+        val packages = GroupsManager.getPackages(this, name).toList()
         if (packages.isEmpty()) {
             Toast.makeText(this, R.string.group_empty_selection, Toast.LENGTH_SHORT).show()
             return
@@ -89,14 +86,36 @@ class GroupsActivity : AppCompatActivity() {
         }
         val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
         val freezeTarget = !GroupsManager.areAllFrozen(this, name)
-        var remaining = packages.size
-        packages.forEach { pkg ->
-            FreezeManager.setFrozen(this, backend, pkg, freezeTarget) { _ ->
-                runOnUiThread {
-                    remaining--
-                    if (remaining == 0) {
-                        refreshList()
-                        Toast.makeText(this, R.string.group_action_done, Toast.LENGTH_SHORT).show()
+
+        processGroupPackage(backend, packages, 0, freezeTarget, failures = 0)
+    }
+
+    private fun processGroupPackage(
+        backend: com.example.link2sdclone.freeze.FreezeBackend,
+        packages: List<String>,
+        index: Int,
+        freezeTarget: Boolean,
+        failures: Int
+    ) {
+        if (index >= packages.size) {
+            refreshList()
+            val msg = if (failures == 0) R.string.group_action_done
+                      else R.string.group_action_partial_failure
+            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val pkg = packages[index]
+        FreezeManager.setFrozen(this, backend, pkg, freezeTarget) { result ->
+            runOnUiThread {
+                when (result) {
+                    is com.example.link2sdclone.freeze.FreezeResult.PermissionRequested -> {
+                    }
+                    is com.example.link2sdclone.freeze.FreezeResult.Success -> {
+                        processGroupPackage(backend, packages, index + 1, freezeTarget, failures)
+                    }
+                    else -> {
+                        processGroupPackage(backend, packages, index + 1, freezeTarget, failures + 1)
                     }
                 }
             }
