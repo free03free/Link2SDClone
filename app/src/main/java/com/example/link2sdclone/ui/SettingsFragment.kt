@@ -33,7 +33,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         findPreference<Preference>("pref_exclusion_list")?.setOnPreferenceClickListener {
-            // TODO: open app-picker screen for the cache-clear exclusion list
+            startActivity(android.content.Intent(requireContext(), CacheExcludeActivity::class.java))
             true
         }
 

@@ -23,7 +23,7 @@ class CacheExcludeActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_cache_exclude)
         findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar_exclude).apply {
-            title = getString(R.string.settings_cache_exclude)
+            title = getString(R.string.pref_exclusion_list_title)
             setNavigationOnClickListener { finish() }
         }
 

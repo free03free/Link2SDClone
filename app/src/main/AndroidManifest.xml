@@ -51,7 +51,7 @@
                 <activity
             android:name=".ui.CacheExcludeActivity"
             android:exported="false"
-            android:label="@string/settings_cache_exclude" />
+            android:label="@string/pref_exclusion_list_title" />
 
         <activity
             android:name=".ui.AppDetailsActivity"
