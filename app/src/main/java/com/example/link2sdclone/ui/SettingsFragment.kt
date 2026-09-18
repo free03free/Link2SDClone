@@ -97,8 +97,8 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         // اللغة: نفس المبدأ -- القيمة محفوظة تلقائيًا، إحنا بس بنطبقها فورًا
         // ونعيد إنشاء الشاشة الحالية لتظهر النتيجة على الفور.
-        findPreference<ListPreference>("pref_language")?.setOnPreferenceChangeListener { _, _ ->
-            LocaleHelper.applyLanguageAndRecreate(requireActivity())
+        findPreference<ListPreference>("pref_language")?.setOnPreferenceChangeListener { _, newValue ->
+            LocaleHelper.applyLanguageAndRecreate(requireActivity(), newValue as String)
             true
         }
     }
