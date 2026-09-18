@@ -366,6 +366,81 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     // ---------------------------------------------------------------------
+    // Freeze snapshot: single dynamic button. First press saves which apps
+    // are currently frozen and unfreezes all of them; second press
+    // re-freezes exactly that saved set and clears the snapshot. Never
+    // touches any app that wasn't already frozen by the user beforehand.
+    // ---------------------------------------------------------------------
+
+    private fun onFreezeSnapshotToggle() {
+        val backends = FreezeManager.availableBackends(this)
+        if (backends.isEmpty()) { showNoFreezeBackendDialog(); return }
+        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
+
+        if (com.example.link2sdclone.freeze.FreezeSnapshotManager.hasSnapshot(this)) {
+            val saved = com.example.link2sdclone.freeze.FreezeSnapshotManager.get(this)
+            val targets = allApps.filter { it.packageName in saved }
+            if (targets.isEmpty()) {
+                com.example.link2sdclone.freeze.FreezeSnapshotManager.clear(this)
+                updateDrawerFreezeLabel()
+                return
+            }
+            var remaining = targets.size
+            targets.forEach { app ->
+                FreezeManager.setFrozen(this, backend, app.packageName, true) { result ->
+                    runOnUiThread {
+                        if (result is FreezeResult.Success) app.isFrozen = true
+                        remaining--
+                        if (remaining == 0) {
+                            com.example.link2sdclone.freeze.FreezeSnapshotManager.clear(this)
+                            applyFilterAndSort()
+                            updateDrawerFreezeLabel()
+                            Toast.makeText(this, R.string.freeze_snapshot_restored, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        } else {
+            val frozenNow = allApps.filter { it.isFrozen }.map { it.packageName }.toSet()
+            if (frozenNow.isEmpty()) {
+                Toast.makeText(this, R.string.freeze_snapshot_nothing_frozen, Toast.LENGTH_SHORT).show()
+                return
+            }
+            com.example.link2sdclone.freeze.FreezeSnapshotManager.save(this, frozenNow)
+            val targets = allApps.filter { it.packageName in frozenNow }
+            var remaining = targets.size
+            targets.forEach { app ->
+                FreezeManager.setFrozen(this, backend, app.packageName, false) { result ->
+                    runOnUiThread {
+                        if (result is FreezeResult.Success) app.isFrozen = false
+                        remaining--
+                        if (remaining == 0) {
+                            applyFilterAndSort()
+                            updateDrawerFreezeLabel()
+                            Toast.makeText(this, R.string.freeze_snapshot_saved, Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /** Call after setupDrawer(...) in onCreate, and this function updates
+     *  itself after every snapshot action above -- no other wiring needed. */
+    private fun updateDrawerFreezeLabel() {
+        val navView = findViewById<com.google.android.material.navigation.NavigationView>(R.id.nav_view) ?: return
+        val item = navView.menu.findItem(R.id.nav_freeze_snapshot) ?: return
+        item.title = if (com.example.link2sdclone.freeze.FreezeSnapshotManager.hasSnapshot(this))
+            getString(R.string.nav_freeze_snapshot_restore)
+        else
+            getString(R.string.nav_freeze_snapshot_save)
+    }
+
+    private fun onGroups() {
+        startActivity(android.content.Intent(this, com.example.link2sdclone.groups.GroupsActivity::class.java))
+    }
+
+    // ---------------------------------------------------------------------
     // Long-press context menu actions
     // ---------------------------------------------------------------------
 

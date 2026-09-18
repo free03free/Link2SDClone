@@ -53,6 +53,15 @@
             android:exported="false"
             android:label="@string/pref_exclusion_list_title" />
 
+                <activity
+            android:name=".groups.GroupsActivity"
+            android:exported="false"
+            android:label="@string/groups_title" />
+
+        <activity
+            android:name=".groups.GroupAppsActivity"
+            android:exported="false" />
+
         <activity
             android:name=".ui.AppDetailsActivity"
             android:exported="false"

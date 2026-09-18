@@ -21,4 +21,23 @@
     <string name="files_last_update">آخر تحديث</string>
     <string name="files_no_browser_notice">تصفح ملفات بيانات تطبيقات أخرى غير متاح بدون صلاحية Root. المعلومات أدناه هي كل ما يسمح نظام أندرويد بالوصول إليه لتطبيق طرف ثالث.</string>
     <string name="settings_cache_exclude">استثناء تطبيقات من التذكير</string>
+    <string name="nav_freeze_snapshot_save">حفظ لقطة وإلغاء تجميد الكل</string>
+    <string name="nav_freeze_snapshot_restore">استعادة اللقطة (إعادة التجميد)</string>
+    <string name="freeze_snapshot_saved">تم حفظ اللقطة وإلغاء تجميد التطبيقات</string>
+    <string name="freeze_snapshot_restored">تم استعادة اللقطة وإعادة التجميد</string>
+    <string name="freeze_snapshot_nothing_frozen">لا توجد تطبيقات مجمّدة حاليًا</string>
+
+    <string name="nav_groups">المجموعات</string>
+    <string name="groups_title">المجموعات</string>
+    <string name="group_new">مجموعة جديدة</string>
+    <string name="group_name_hint">اسم المجموعة</string>
+    <string name="group_create">إنشاء</string>
+    <string name="group_cancel">إلغاء</string>
+    <string name="group_delete_confirm">حذف هذه المجموعة؟</string>
+    <string name="group_apps_count">%d تطبيق</string>
+    <string name="group_freeze_all">تجميد الكل</string>
+    <string name="group_unfreeze_all">إلغاء تجميد الكل</string>
+    <string name="group_empty">لا توجد مجموعات بعد. اضغط + لإنشاء واحدة</string>
+    <string name="group_empty_selection">لا توجد تطبيقات مضافة لهذه المجموعة بعد</string>
+    <string name="group_action_done">تم تنفيذ الإجراء على تطبيقات المجموعة</string>
 </resources>

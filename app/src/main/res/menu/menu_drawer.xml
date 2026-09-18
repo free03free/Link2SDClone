@@ -27,6 +27,19 @@
     <item android:title="@string/nav_section_tools">
         <menu>
             <item
+                android:id="@+id/nav_freeze_snapshot"
+                android:icon="@drawable/ic_ac_unit"
+                android:title="@string/nav_freeze_snapshot_save" />
+            <item
+                android:id="@+id/nav_groups"
+                android:icon="@drawable/ic_group"
+                android:title="@string/nav_groups" />
+        </menu>
+    </item>
+
+    <item android:title="@string/nav_section_tools">
+        <menu>
+            <item
                 android:id="@+id/nav_storage_info"
                 android:icon="@drawable/ic_storage"
                 android:title="@string/menu_storage_info" />
