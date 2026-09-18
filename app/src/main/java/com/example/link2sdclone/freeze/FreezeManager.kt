@@ -19,8 +19,15 @@ object FreezeManager {
     /** Sticky choice, e.g. read from Settings; null = "ask me" / "use whichever is installed". */
     var preferredBackend: FreezeBackend? = null
 
-    private var pendingIslandCallback: ((Boolean) -> Unit)? = null
-    private var pendingShizukuCallback: ((Boolean) -> Unit)? = null
+    // Lists, not single nullable callbacks: when a group action fires
+    // setFrozen() for several packages back-to-back before permission is
+    // granted, each call used to overwrite the previous pending callback,
+    // silently dropping the freeze for every package but the last one in
+    // the batch (and breaking the remaining-count Toast). Queuing callbacks
+    // and invoking+draining the whole list once permission is granted fixes
+    // both the missing-Toast bug and the "only last app freezes" bug.
+    private val pendingIslandCallbacks = mutableListOf<(Boolean) -> Unit>()
+    private val pendingShizukuCallbacks = mutableListOf<(Boolean) -> Unit>()
     private var shizukuPermissionListener: Any? = null
 
     fun availableBackends(context: Context): List<FreezeBackend> = buildList {
@@ -48,14 +55,20 @@ object FreezeManager {
                     onFinalResult(FreezeResult.BackendNotAvailable); return
                 }
                 if (!ShizukuFreezeBackend.hasPermission()) {
-                    pendingShizukuCallback = { granted ->
+                    val alreadyPending = pendingShizukuCallbacks.isNotEmpty()
+                    pendingShizukuCallbacks.add { granted ->
                         if (granted) {
                             onFinalResult(performShizukuFreeze(activity, packageName, freeze))
                         } else {
                             onFinalResult(FreezeResult.Failed("shizuku_permission_denied"))
                         }
                     }
-                    ShizukuFreezeBackend.requestPermission(FreezeRequestCodes.SHIZUKU_PERMISSION)
+                    // Only fire the actual system prompt once; the rest of
+                    // this batch just queues up and waits for the same
+                    // permission result below.
+                    if (!alreadyPending) {
+                        ShizukuFreezeBackend.requestPermission(FreezeRequestCodes.SHIZUKU_PERMISSION)
+                    }
                     onFinalResult(FreezeResult.PermissionRequested)
                     return
                 }
@@ -67,7 +80,8 @@ object FreezeManager {
                     onFinalResult(FreezeResult.BackendNotAvailable); return
                 }
                 if (!IslandFreezeBackend.hasPermission(activity)) {
-                    pendingIslandCallback = { granted ->
+                    val alreadyPending = pendingIslandCallbacks.isNotEmpty()
+                    pendingIslandCallbacks.add { granted ->
                         if (granted) {
                             val sent = IslandFreezeBackend.requestFreeze(
                                 activity, packageName, freeze, FreezeRequestCodes.ISLAND_API_RESULT
@@ -78,7 +92,9 @@ object FreezeManager {
                             onFinalResult(FreezeResult.Failed("island_permission_denied"))
                         }
                     }
-                    IslandFreezeBackend.requestPermission(activity, FreezeRequestCodes.ISLAND_PERMISSION)
+                    if (!alreadyPending) {
+                        IslandFreezeBackend.requestPermission(activity, FreezeRequestCodes.ISLAND_PERMISSION)
+                    }
                     onFinalResult(FreezeResult.PermissionRequested)
                     return
                 }
@@ -116,8 +132,9 @@ object FreezeManager {
     fun onRequestPermissionsResult(requestCode: Int, grantResults: IntArray) {
         if (requestCode == FreezeRequestCodes.ISLAND_PERMISSION) {
             val granted = grantResults.isNotEmpty() && grantResults[0] == android.content.pm.PackageManager.PERMISSION_GRANTED
-            pendingIslandCallback?.invoke(granted)
-            pendingIslandCallback = null
+            val callbacks = pendingIslandCallbacks.toList()
+            pendingIslandCallbacks.clear()
+            callbacks.forEach { it.invoke(granted) }
         }
     }
 
@@ -137,8 +154,9 @@ object FreezeManager {
         val listener = rikka.shizuku.Shizuku.OnRequestPermissionResultListener { requestCode, grantResult ->
             if (requestCode == FreezeRequestCodes.SHIZUKU_PERMISSION) {
                 val granted = grantResult == android.content.pm.PackageManager.PERMISSION_GRANTED
-                pendingShizukuCallback?.invoke(granted)
-                pendingShizukuCallback = null
+                val callbacks = pendingShizukuCallbacks.toList()
+                pendingShizukuCallbacks.clear()
+                callbacks.forEach { it.invoke(granted) }
             }
         }
         shizukuPermissionListener = listener
