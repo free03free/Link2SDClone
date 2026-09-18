@@ -48,6 +48,11 @@
             android:exported="false"
             android:label="@string/menu_storage_info" />
 
+                <activity
+            android:name=".ui.CacheExcludeActivity"
+            android:exported="false"
+            android:label="@string/exclusion_list" />
+
         <activity
             android:name=".ui.AppDetailsActivity"
             android:exported="false"

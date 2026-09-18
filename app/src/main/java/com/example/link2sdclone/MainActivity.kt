@@ -46,6 +46,7 @@ import com.example.link2sdclone.ui.setupDrawer
 import com.example.link2sdclone.ui.showAppContextMenu
 import com.example.link2sdclone.ui.showFilterDialog
 import com.example.link2sdclone.ui.showSortDialog
+import com.example.link2sdclone.storage.StorageStatsHelper
 import com.google.android.material.navigation.NavigationView
 import java.io.File
 
@@ -159,21 +160,29 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         val pm = packageManager
         val installed = pm.getInstalledApplications(PackageManager.GET_META_DATA)
 
+        val hasUsageAccess = StorageStatsHelper.hasUsageAccess(this)
+
         allApps = installed.map { info ->
             val apkFile = File(info.sourceDir)
             val isSystem = (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0
             val isFrozen = !info.enabled
+            val pkgInfo = try { pm.getPackageInfo(info.packageName, 0) } catch (e: Exception) { null }
+            val realSizes = if (hasUsageAccess) StorageStatsHelper.queryRealSizes(this, info.uid) else null
             AppEntry(
                 packageName = info.packageName,
                 label = pm.getApplicationLabel(info).toString(),
                 apkPath = info.sourceDir,
                 icon = try { pm.getApplicationIcon(info) } catch (e: Exception) { null },
+                uid = info.uid,
                 apkSizeBytes = if (apkFile.exists()) apkFile.length() else 0L,
-                dataSizeBytes = 0L,
-                cacheSizeBytes = 0L,
+                dataSizeBytes = realSizes?.dataBytes ?: 0L,
+                cacheSizeBytes = realSizes?.cacheBytes ?: 0L,
+                hasRealSizes = realSizes != null,
                 isSystemApp = isSystem,
                 isOnSdCard = info.sourceDir.contains("/mnt/") || info.sourceDir.contains("/storage/"),
-                isFrozen = isFrozen
+                isFrozen = isFrozen,
+                firstInstallTime = pkgInfo?.firstInstallTime ?: 0L,
+                lastUpdateTime = pkgInfo?.lastUpdateTime ?: 0L
             )
         }.sortedBy { it.label.lowercase() }
 
@@ -181,14 +190,17 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     private fun applyFilterAndSort() {
+        // الترتيب يطابق filter_options: 0 الكل, 1 نظام, 2 مستخدم, 3 على SD,
+        // 4 داخلي, 5 مفضلة, 6 مجمّد, 7 محدّث مؤخرًا, 8 قابل للنقل (تقريبي)
         var list = when (currentFilterIndex) {
             1 -> allApps.filter { it.isSystemApp }
             2 -> allApps.filter { !it.isSystemApp }
             3 -> allApps.filter { it.isOnSdCard }
-            4 -> allApps.filter { it.isOnSdCard }
-            5 -> allApps.filter { !it.isOnSdCard }
-            6 -> allApps.filter { it.isFavorite }
-            7 -> allApps.filter { it.isFrozen }
+            4 -> allApps.filter { !it.isOnSdCard }
+            5 -> allApps.filter { it.isFavorite }
+            6 -> allApps.filter { it.isFrozen }
+            7 -> allApps.filter { it.isRecentlyUpdated }
+            8 -> allApps.filter { !it.isSystemApp } // تقريبي: تطبيقات المستخدم عادة قابلة للنقل
             else -> allApps
         }
 
@@ -196,10 +208,13 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             list = list.filter { it.label.contains(searchQuery, ignoreCase = true) }
         }
 
+        // الترتيب يطابق sort_options: 0 الاسم, 1 التاريخ, 2 apk, 3 بيانات, 4 كاش, 5 إجمالي
         list = when (currentSortIndex) {
-            1 -> list
+            1 -> list.sortedByDescending { maxOf(it.firstInstallTime, it.lastUpdateTime) }
             2 -> list.sortedByDescending { it.apkSizeBytes }
-            11 -> list.sortedByDescending { it.totalSizeBytes }
+            3 -> list.sortedByDescending { it.dataSizeBytes }
+            4 -> list.sortedByDescending { it.cacheSizeBytes }
+            5 -> list.sortedByDescending { it.totalSizeBytes }
             else -> list.sortedBy { it.label.lowercase() }
         }
 
