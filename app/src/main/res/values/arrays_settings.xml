@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- المظهر: يطابق android:defaultValue="light" بـ preferences.xml -->
+    <string-array name="appearance_entries">
+        <item>فاتح</item>
+        <item>غامق</item>
+        <item>حسب النظام</item>
+    </string-array>
+    <string-array name="appearance_values">
+        <item>light</item>
+        <item>dark</item>
+        <item>system</item>
+    </string-array>
+
+    <!-- اللغة: يطابق android:defaultValue="default" بـ preferences.xml -->
+    <string-array name="language_entries">
+        <item>حسب لغة النظام</item>
+        <item>العربية</item>
+        <item>English</item>
+    </string-array>
+    <string-array name="language_values">
+        <item>default</item>
+        <item>ar</item>
+        <item>en</item>
+    </string-array>
+
+    <!-- مزود التجميد: يطابق منطق SettingsFragment.kt بالضبط
+         ("shizuku" -> SHIZUKU, "island" -> ISLAND, غير هيك -> null/تلقائي) -->
+    <string-array name="freeze_backend_entries">
+        <item>تلقائي (حسب المتاح)</item>
+        <item>Shizuku</item>
+        <item>Island</item>
+    </string-array>
+    <string-array name="freeze_backend_values">
+        <item>auto</item>
+        <item>shizuku</item>
+        <item>island</item>
+    </string-array>
+</resources>
