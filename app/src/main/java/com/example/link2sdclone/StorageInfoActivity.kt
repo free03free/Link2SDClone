@@ -1,45 +1,58 @@
 package com.example.link2sdclone
 
 import android.os.Bundle
-import android.os.StatFs
 import android.os.Environment
-import android.widget.TextView
+import android.os.StatFs
 import androidx.appcompat.app.AppCompatActivity
+import com.example.link2sdclone.databinding.ActivityStorageInfoBinding
+import com.example.link2sdclone.databinding.ItemStorageBarBinding
 
 /**
- * تعرض معلومات المساحة: الذاكرة الداخلية، مساحة الـ SD الأساسية،
- * ومساحة الـ Partition الثاني إن وُجد — تماماً كتبويب "Storage info" في Link2SD.
+ * تعرض معلومات المساحة: ذاكرة الهاتف، ذاكرة البطاقة، النظام، والمخبأ.
  */
 class StorageInfoActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityStorageInfoBinding
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_storage_info)
+        binding = ActivityStorageInfoBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val textInternal = findViewById<TextView>(R.id.textInternalStorage)
-        val textSd = findViewById<TextView>(R.id.textSdStorage)
-        val textSecondPartition = findViewById<TextView>(R.id.textSecondPartition)
+        setSupportActionBar(binding.toolbarStorage)
+        binding.toolbarStorage.setNavigationOnClickListener { finish() }
+        binding.iconShare.setOnClickListener { finish() }
 
-        textInternal.text = formatStorageInfo(
+        fillStorageBar(
+            binding.storagePhone,
             Environment.getDataDirectory().path,
             getString(R.string.internal_storage)
         )
 
-        textSd.text = formatStorageInfo(
+        fillStorageBar(
+            binding.storageSdcard,
             Environment.getExternalStorageDirectory().path,
             getString(R.string.sd_storage)
         )
 
-        val secondPartitionPath = RootUtils.findSecondPartitionPath()
-        textSecondPartition.text = if (secondPartitionPath != null) {
-            formatStorageInfo(secondPartitionPath, getString(R.string.second_partition))
-        } else {
-            getString(R.string.no_second_partition_found)
-        }
+        fillStorageBar(
+            binding.storageSystem,
+            "/system",
+            "النظام"
+        )
+
+        fillStorageBar(
+            binding.storageCache,
+            cacheDir.path,
+            "المخبأ"
+        )
     }
 
-    private fun formatStorageInfo(path: String, label: String): String {
-        return try {
+    private fun fillStorageBar(itemBinding: ItemStorageBarBinding, path: String, title: String) {
+        itemBinding.textStorageTitle.text = title
+        itemBinding.textStoragePath.text = path
+
+        try {
             val stat = StatFs(path)
             val totalBytes = stat.blockSizeLong * stat.blockCountLong
             val availableBytes = stat.blockSizeLong * stat.availableBlocksLong
@@ -49,9 +62,14 @@ class StorageInfoActivity : AppCompatActivity() {
             val usedMb = usedBytes / (1024 * 1024)
             val availableMb = availableBytes / (1024 * 1024)
 
-            getString(R.string.storage_format, label, usedMb, totalMb, availableMb)
+            val percentUsed = if (totalBytes > 0) ((usedBytes * 100) / totalBytes).toInt() else 0
+            itemBinding.barStorage.progress = percentUsed
+
+            itemBinding.textStorageDetail.text = getString(
+                R.string.storage_format, title, usedMb, totalMb, availableMb
+            )
         } catch (e: Exception) {
-            "$label: ${getString(R.string.error_reading_storage)}"
+            itemBinding.textStorageDetail.text = getString(R.string.error_reading_storage)
         }
     }
 }
