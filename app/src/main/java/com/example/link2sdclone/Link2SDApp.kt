@@ -6,6 +6,12 @@ import android.content.Intent
 import android.os.Bundle
 import com.example.link2sdclone.lock.LockActivity
 import com.example.link2sdclone.lock.LockManager
+import java.io.File
+import java.io.PrintWriter
+import java.io.StringWriter
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class Link2SDApp : Application() {
 
@@ -13,6 +19,30 @@ class Link2SDApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
+        // Temporary diagnostic handler: writes any uncaught crash (message +
+        // full stack trace + timestamp) to a file under this app's own
+        // external-files directory. No storage permission is needed for
+        // this path on any Android version, and the file is readable from
+        // Termux without adb/root, e.g.:
+        //   cat /sdcard/Android/data/com.example.link2sdclone/files/crash_log.txt
+        val defaultHandler = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            try {
+                val sw = StringWriter()
+                throwable.printStackTrace(PrintWriter(sw))
+                val timestamp = SimpleDateFormat("yyyy-MM-dd HH:mm:ss", Locale.US).format(Date())
+                val entry = "
+===== CRASH at $timestamp (thread: ${thread.name}) =====
+$sw"
+                val file = File(getExternalFilesDir(null), "crash_log.txt")
+                file.appendText(entry)
+            } catch (e: Exception) {
+                // If logging itself fails, don't block the default handler.
+            }
+            defaultHandler?.uncaughtException(thread, throwable)
+        }
+
         registerActivityLifecycleCallbacks(object : ActivityLifecycleCallbacks {
             override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) {}
 
