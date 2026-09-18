@@ -105,6 +105,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         val navView = findViewById<NavigationView>(R.id.nav_view)
         toolbar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         setupDrawer(navView, drawerLayout, this)
+        updateDrawerFreezeLabel() // يعكس اللقطة المحفوظة سابقًا فورًا عند فتح التطبيق
         headerCount = findViewById(R.id.list_header_count)
 
         val recyclerView = findViewById<RecyclerView>(R.id.app_list)

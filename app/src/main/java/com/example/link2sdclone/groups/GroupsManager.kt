@@ -50,6 +50,17 @@ object GroupsManager {
         writeAll(context, obj)
     }
 
+    /** True only if every installed package in the group is currently
+     *  frozen (disabled). Empty group counts as false (nothing to unfreeze). */
+    fun areAllFrozen(context: Context, groupName: String): Boolean {
+        val pkgs = getPackages(context, groupName)
+        if (pkgs.isEmpty()) return false
+        val pm = context.packageManager
+        return pkgs.all { pkg ->
+            try { !pm.getApplicationInfo(pkg, 0).enabled } catch (e: Exception) { false }
+        }
+    }
+
     fun setPackages(context: Context, groupName: String, packages: Set<String>) {
         val obj = readAll(context)
         obj.put(groupName, JSONArray(packages.toList()))

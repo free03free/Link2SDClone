@@ -1,5 +1,6 @@
 package com.example.link2sdclone.groups
 
+import android.graphics.PorterDuff
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -7,11 +8,14 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
+import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.link2sdclone.R
+import com.example.link2sdclone.freeze.FreezeManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 
 class GroupsActivity : AppCompatActivity() {
@@ -47,14 +51,45 @@ class GroupsActivity : AppCompatActivity() {
         emptyView.visibility = if (names.isEmpty()) View.VISIBLE else View.GONE
         recyclerView.visibility = if (names.isEmpty()) View.GONE else View.VISIBLE
         recyclerView.adapter = GroupsAdapter(names,
-            onClick = { name ->
+            onOpen = { name ->
                 startActivity(
                     android.content.Intent(this, GroupAppsActivity::class.java)
                         .putExtra(GroupAppsActivity.EXTRA_GROUP_NAME, name)
                 )
             },
+            onToggle = { name -> toggleGroupFreeze(name) },
             onDelete = { name -> confirmDelete(name) }
         )
+    }
+
+    /** Freezes every app in the group if any is currently unfrozen; if the
+     *  whole group is already frozen, unfreezes it instead. No need to open
+     *  the group screen for this. */
+    private fun toggleGroupFreeze(name: String) {
+        val packages = GroupsManager.getPackages(this, name)
+        if (packages.isEmpty()) {
+            Toast.makeText(this, R.string.group_empty_selection, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val backends = FreezeManager.availableBackends(this)
+        if (backends.isEmpty()) {
+            Toast.makeText(this, R.string.freeze_no_backend_title, Toast.LENGTH_SHORT).show()
+            return
+        }
+        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
+        val freezeTarget = !GroupsManager.areAllFrozen(this, name)
+        var remaining = packages.size
+        packages.forEach { pkg ->
+            FreezeManager.setFrozen(this, backend, pkg, freezeTarget) { _ ->
+                runOnUiThread {
+                    remaining--
+                    if (remaining == 0) {
+                        refreshList()
+                        Toast.makeText(this, R.string.group_action_done, Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
     }
 
     private fun showCreateGroupDialog() {
@@ -86,13 +121,15 @@ class GroupsActivity : AppCompatActivity() {
 
     private inner class GroupsAdapter(
         private val names: List<String>,
-        private val onClick: (String) -> Unit,
+        private val onOpen: (String) -> Unit,
+        private val onToggle: (String) -> Unit,
         private val onDelete: (String) -> Unit
     ) : RecyclerView.Adapter<GroupsAdapter.Holder>() {
 
         inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
             val name: TextView = view.findViewById(R.id.group_name)
             val count: TextView = view.findViewById(R.id.group_count)
+            val toggle: ImageButton = view.findViewById(R.id.group_toggle)
             val delete: ImageButton = view.findViewById(R.id.group_delete)
         }
 
@@ -106,7 +143,16 @@ class GroupsActivity : AppCompatActivity() {
             val count = GroupsManager.getPackages(this@GroupsActivity, name).size
             holder.name.text = name
             holder.count.text = getString(R.string.group_apps_count, count)
-            holder.itemView.setOnClickListener { onClick(name) }
+
+            val allFrozen = GroupsManager.areAllFrozen(this@GroupsActivity, name)
+            val tintColor = if (allFrozen)
+                ContextCompat.getColor(this@GroupsActivity, R.color.colorAccent)
+            else
+                ContextCompat.getColor(this@GroupsActivity, android.R.color.darker_gray)
+            holder.toggle.setColorFilter(tintColor, PorterDuff.Mode.SRC_IN)
+
+            holder.itemView.setOnClickListener { onOpen(name) }
+            holder.toggle.setOnClickListener { onToggle(name) }
             holder.delete.setOnClickListener { onDelete(name) }
         }
 

@@ -31,9 +31,18 @@
     </LinearLayout>
 
     <ImageButton
+        android:id="@+id/group_toggle"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@drawable/ic_power_toggle"
+        android:contentDescription="@string/group_toggle_desc" />
+
+    <ImageButton
         android:id="@+id/group_delete"
         android:layout_width="40dp"
         android:layout_height="40dp"
+        android:layout_marginStart="4dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:src="@android:drawable/ic_menu_delete"
         android:contentDescription="@null" />

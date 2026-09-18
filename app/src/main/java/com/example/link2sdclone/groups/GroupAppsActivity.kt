@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.CheckBox
 import android.widget.ImageView
 import android.widget.TextView
@@ -14,21 +15,16 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.link2sdclone.R
-import com.example.link2sdclone.freeze.FreezeBackend
 import com.example.link2sdclone.freeze.FreezeManager
-import com.example.link2sdclone.freeze.FreezeResult
+import com.example.link2sdclone.ui.showFilterDialog
 
-/**
- * Lets the user pick which installed apps belong to this group (checklist,
- * same pattern as CacheExcludeActivity), plus two explicit buttons to
- * freeze/unfreeze every app currently in the group. Two separate buttons on
- * purpose here (unlike the single snapshot button) -- a group's apps can be
- * in a mixed frozen/unfrozen state, so "toggle" would be ambiguous.
- */
 class GroupAppsActivity : AppCompatActivity() {
 
     private lateinit var groupName: String
     private lateinit var selected: MutableSet<String>
+    private lateinit var recyclerView: RecyclerView
+    private var allInstalledApps: List<ApplicationInfo> = emptyList()
+    private var currentFilterIndex = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,21 +39,45 @@ class GroupAppsActivity : AppCompatActivity() {
         }
 
         val pm = packageManager
-        val apps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
+        allInstalledApps = pm.getInstalledApplications(PackageManager.GET_META_DATA)
             .sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
 
-        val recyclerView = findViewById<RecyclerView>(R.id.group_apps_list)
+        recyclerView = findViewById(R.id.group_apps_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
-        recyclerView.adapter = AppsAdapter(apps) { packageName, isChecked ->
-            if (isChecked) selected.add(packageName) else selected.remove(packageName)
-            GroupsManager.setPackages(this, groupName, selected)
+        applyFilter()
+
+        findViewById<Button>(R.id.btn_filter_group).setOnClickListener {
+            showFilterDialog(this, currentFilterIndex) { index ->
+                currentFilterIndex = index
+                applyFilter()
+            }
         }
 
-        findViewById<android.widget.Button>(R.id.btn_freeze_group).setOnClickListener {
-            applyToGroup(freeze = true)
+        findViewById<Button>(R.id.btn_freeze_group).setOnClickListener { applyToGroup(freeze = true) }
+        findViewById<Button>(R.id.btn_unfreeze_group).setOnClickListener { applyToGroup(freeze = false) }
+    }
+
+    /** Only the filter categories that make sense from raw ApplicationInfo
+     *  (no root, no favorites/recent-update tracking on this screen) --
+     *  anything else falls back to "All" with a short explanation, same
+     *  honest-degradation pattern used elsewhere in this project. */
+    private fun applyFilter() {
+        val filtered = when (currentFilterIndex) {
+            1 -> allInstalledApps.filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0 }
+            2 -> allInstalledApps.filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
+            4 -> allInstalledApps.filter { it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/") }
+            5 -> allInstalledApps.filter { !(it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/")) }
+            7 -> allInstalledApps.filter { !it.enabled }
+            0 -> allInstalledApps
+            else -> {
+                Toast.makeText(this, R.string.group_filter_unsupported, Toast.LENGTH_SHORT).show()
+                currentFilterIndex = 0
+                allInstalledApps
+            }
         }
-        findViewById<android.widget.Button>(R.id.btn_unfreeze_group).setOnClickListener {
-            applyToGroup(freeze = false)
+        recyclerView.adapter = AppsAdapter(filtered) { packageName, isChecked ->
+            if (isChecked) selected.add(packageName) else selected.remove(packageName)
+            GroupsManager.setPackages(this, groupName, selected)
         }
     }
 
@@ -75,12 +95,10 @@ class GroupAppsActivity : AppCompatActivity() {
         val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
         var remaining = packages.size
         packages.forEach { pkg ->
-            FreezeManager.setFrozen(this, backend, pkg, freeze) { result ->
+            FreezeManager.setFrozen(this, backend, pkg, freeze) { _ ->
                 runOnUiThread {
                     remaining--
-                    if (remaining == 0) {
-                        Toast.makeText(this, R.string.group_action_done, Toast.LENGTH_SHORT).show()
-                    }
+                    if (remaining == 0) Toast.makeText(this, R.string.group_action_done, Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -98,7 +116,6 @@ class GroupAppsActivity : AppCompatActivity() {
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
-            // reuses the existing item_exclude_row.xml layout (icon + label + checkbox)
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_exclude_row, parent, false)
             return Holder(view)
         }

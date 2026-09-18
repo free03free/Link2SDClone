@@ -12,6 +12,13 @@
         android:background="@color/colorPrimary"
         app:navigationIcon="@drawable/ic_back" />
 
+    <Button
+        android:id="@+id/btn_filter_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="8dp"
+        android:text="@string/group_filter_button" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/group_apps_list"
         android:layout_width="match_parent"

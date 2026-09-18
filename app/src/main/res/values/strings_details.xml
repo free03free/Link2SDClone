@@ -40,4 +40,7 @@
     <string name="group_empty">لا توجد مجموعات بعد. اضغط + لإنشاء واحدة</string>
     <string name="group_empty_selection">لا توجد تطبيقات مضافة لهذه المجموعة بعد</string>
     <string name="group_action_done">تم تنفيذ الإجراء على تطبيقات المجموعة</string>
+    <string name="group_toggle_desc">تجميد أو إلغاء تجميد كل تطبيقات المجموعة</string>
+    <string name="group_filter_button">تصفية التطبيقات</string>
+    <string name="group_filter_unsupported">هذا الفلتر غير مدعوم بهذه الشاشة</string>
 </resources>
