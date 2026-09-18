@@ -88,23 +88,16 @@ class SettingsFragment : PreferenceFragmentCompat() {
             true
         }
 
-        // المظهر: تطبيق فوري، القيمة تنحفظ تلقائيًا لأن ListPreference
-        // بيكتب على SharedPreferences قبل استدعاء هذا الـ listener.
-        findPreference<ListPreference>("pref_appearance")?.setOnPreferenceChangeListener { _, newValue ->
-            requireContext().getSharedPreferences(
-                androidx.preference.PreferenceManager.getDefaultSharedPreferencesName(requireContext()),
-                Context.MODE_PRIVATE
-            ).edit().putString("pref_appearance", newValue as String).apply()
+        // المظهر: ListPreference يحفظ القيمة تلقائيًا بـ SharedPreferences
+        // الافتراضية قبل استدعاء هذا الـ listener، فما محتاجين نكتبها يدويًا.
+        findPreference<ListPreference>("pref_appearance")?.setOnPreferenceChangeListener { _, _ ->
             LocaleHelper.applyTheme(requireContext())
             true
         }
 
-        // اللغة: تطبيق فوري + إعادة إنشاء الشاشة الحالية لتظهر النتيجة فورًا
-        findPreference<ListPreference>("pref_language")?.setOnPreferenceChangeListener { _, newValue ->
-            requireContext().getSharedPreferences(
-                androidx.preference.PreferenceManager.getDefaultSharedPreferencesName(requireContext()),
-                Context.MODE_PRIVATE
-            ).edit().putString("pref_language", newValue as String).apply()
+        // اللغة: نفس المبدأ -- القيمة محفوظة تلقائيًا، إحنا بس بنطبقها فورًا
+        // ونعيد إنشاء الشاشة الحالية لتظهر النتيجة على الفور.
+        findPreference<ListPreference>("pref_language")?.setOnPreferenceChangeListener { _, _ ->
             LocaleHelper.applyLanguageAndRecreate(requireActivity())
             true
         }
