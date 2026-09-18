@@ -79,33 +79,37 @@ class LockSetupActivity : AppCompatActivity() {
         hideCodeEntry()
     }
 
+    // ملاحظة الإصلاح: خطوة "الرمز القديم" لازم تعرض شاشة إدخال بنوع
+    // الرمز القديم المخزّن حالياً (LockManager.getType) وليس النوع الجديد
+    // المطلوب (pendingType) — هذا كان سبب توقف تغيير النوع.
     private fun startEnterOld() {
         step = Step.ENTER_OLD
-        showCodeEntry(promptFor(LockManager.getType(this), "أدخل الرمز الحالي"))
+        val oldType = LockManager.getType(this)
+        showCodeEntry(promptFor(oldType, "أدخل الرمز الحالي"), oldType)
     }
 
     private fun startEnterNew() {
         step = Step.ENTER_NEW
         tempNewCode = null
-        showCodeEntry(promptFor(pendingType, "أدخل رمز جديد"))
+        showCodeEntry(promptFor(pendingType, "أدخل رمز جديد"), pendingType)
     }
 
     private fun startConfirmNew() {
         step = Step.CONFIRM_NEW
-        showCodeEntry(promptFor(pendingType, "أعد إدخال الرمز للتأكيد"))
+        showCodeEntry(promptFor(pendingType, "أعد إدخال الرمز للتأكيد"), pendingType)
     }
 
     private fun promptFor(type: String, base: String): String =
         if (type == LockManager.TYPE_PATTERN) "$base (نمط)" else "$base (رقمي)"
 
-    private fun showCodeEntry(prompt: String) {
+    private fun showCodeEntry(prompt: String, inputType: String) {
         binding.containerCodeEntry.visibility = View.VISIBLE
         binding.textCodePrompt.text = prompt
         binding.textCodeError.visibility = View.INVISIBLE
         binding.editPinSetup.text?.clear()
         binding.patternViewSetup.reset()
 
-        val isPattern = pendingType == LockManager.TYPE_PATTERN
+        val isPattern = inputType == LockManager.TYPE_PATTERN
         binding.editPinSetup.visibility = if (isPattern) View.GONE else View.VISIBLE
         binding.btnCodeContinue.visibility = if (isPattern) View.GONE else View.VISIBLE
         binding.patternViewSetup.visibility = if (isPattern) View.VISIBLE else View.GONE
