@@ -18,7 +18,7 @@
     <!-- Filter options for the group-apps screen only: same as filter_options
          plus one extra item scoped to the current group's own package set
          (not a device-wide frozen filter). Kept separate from filter_options
-         so this item never shows up -- or shifts indices -- on other screens. -->
+         so this item never shows up, or shifts indices, on other screens. -->
     <string-array name="group_filter_options">
         <item>@string/filter_all</item>
         <item>@string/filter_system</item>
