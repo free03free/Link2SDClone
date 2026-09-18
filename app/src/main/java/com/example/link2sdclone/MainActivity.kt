@@ -372,7 +372,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     // touches any app that wasn't already frozen by the user beforehand.
     // ---------------------------------------------------------------------
 
-    private fun onFreezeSnapshotToggle() {
+    private fun onFreezeSnapshotToggleAction() {
         val backends = FreezeManager.availableBackends(this)
         if (backends.isEmpty()) { showNoFreezeBackendDialog(); return }
         val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
@@ -436,7 +436,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             getString(R.string.nav_freeze_snapshot_save)
     }
 
-    private fun onGroups() {
+    private fun onGroupsAction() {
         startActivity(android.content.Intent(this, com.example.link2sdclone.groups.GroupsActivity::class.java))
     }
 
@@ -650,4 +650,6 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     override fun onOnPhone() { currentFilterIndex = 5; applyFilterAndSort() }
     override fun onFrozen() { currentFilterIndex = 7; applyFilterAndSort() }
     override fun onFavorites() { currentFilterIndex = 6; applyFilterAndSort() }
+    override fun onFreezeSnapshotToggle() = onFreezeSnapshotToggleAction()
+    override fun onGroups() = onGroupsAction()
 }
