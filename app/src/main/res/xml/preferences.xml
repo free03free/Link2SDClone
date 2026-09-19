@@ -62,7 +62,6 @@
             android:key="pref_auto_clear_cache"
             android:title="@string/pref_auto_clear_cache_title"
             android:summary="@string/pref_auto_clear_cache_summary"
-            android:enabled="false"
             android:defaultValue="false" />
 
         <CheckBoxPreference

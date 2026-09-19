@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st2_auto_clear_title">المسح التلقائي للمخبأ</string>
+    <string name="st2_need_access">هذا الخيار يحتاج Root أو Shizuku. شغّل أحدهما وامنح التطبيق الصلاحية ثم أعد المحاولة.</string>
+    <string name="st2_shizuku_asked">طُلبت صلاحية Shizuku. امنحها ثم فعّل الخيار مرة أخرى.</string>
+    <string name="st2_loc_applied">تم تطبيق مكان التثبيت على النظام</string>
+    <string name="st2_loc_failed">تم حفظ الاختيار لكن النظام رفض تطبيقه</string>
+    <string name="st2_loc_saved_only">تم حفظ الاختيار. تطبيقه على النظام يحتاج Root أو Shizuku.</string>
+    <string name="st2_saved_needs_engine">تم حفظ الخيار. تنفيذه الفعلي يحتاج محرك الربط (Root) ولم يُفعَّل بعد في هذه النسخة.</string>
+    <string name="st2_saved_ext_cache">تم حفظ الخيار. يُطبَّق على المسح التلقائي عند ربط قائمة الاستثناء به.</string>
+    <string name="st2_notif_channel">المسح التلقائي للمخبأ</string>
+    <string name="st2_notif_title">تم مسح ذاكرة التخزين المؤقت</string>
+    <string name="st2_notif_text">تم تحرير %1$s MB</string>
+    <string name="st2_about_body">Link2SD Clone\nالإصدار: %1$s\n\nنسخة مبنية على غرار Link2SD لإدارة نقل التطبيقات وربطها وتجميدها.</string>
+    <string name="st2_whats_new_body">• إعادة تصميم شاشة معلومات التطبيق (التخزين والملفات)\n• قوائم الفلتر والترتيب المخصصة\n• علامة «مجمد(ة)» بجانب اسم التطبيق\n• المفضلة والمجموعات\n• أدوات الروت (Root وShizuku)\n• حوارات الإعدادات مكتملة</string>
+    <string-array name="st2_install_locations">
+        <item>تلقائي</item>
+        <item>الذاكرة الداخلية</item>
+        <item>بطاقة الذاكرة</item>
+    </string-array>
+    <string-array name="st2_auto_link_items">
+        <item>ملفات apk</item>
+        <item>ملفات dex</item>
+        <item>ملفات lib</item>
+    </string-array>
+</resources>

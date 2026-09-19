@@ -100,5 +100,8 @@
 
         <!-- rikka.shizuku:shizuku-provider merges its own <provider> entry
              automatically from its AAR manifest — nothing to add here. -->
+        <activity
+            android:name="com.example.link2sdclone.ui.RootToolsActivity"
+            android:exported="false" />
     </application>
 </manifest>

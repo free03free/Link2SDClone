@@ -81,6 +81,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         setContentView(R.layout.activity_main)
 
         FreezeManager.registerShizukuListener(this)
+        com.example.link2sdclone.ui.applySavedFreezeBackend(this)
         requestNotificationPermissionIfNeeded()
 
         toolbar = findViewById(R.id.toolbar)
@@ -364,23 +365,22 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     private fun showBatchActionsMenu(anchor: View) {
-        val popup = PopupMenu(this, anchor)
-        popup.menuInflater.inflate(R.menu.menu_batch_actions, popup.menu)
-        popup.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.batch_freeze -> { batchSetFrozen(true); true }
-                R.id.batch_unfreeze -> { batchSetFrozen(false); true }
-                else -> false
+        val titles = com.example.link2sdclone.ui.BatchActions.labels(this)
+        com.example.link2sdclone.ui.showActionPopup(this, anchor, titles) { index ->
+            if (selectedPackages.isEmpty()) {
+                Toast.makeText(this, R.string.batch_no_selection, Toast.LENGTH_SHORT).show()
+            } else if (index == 4) {
+                batchSetFrozen(true)
+            } else if (index == 5) {
+                batchSetFrozen(false)
+            } else {
+                val targets = allApps.filter { it.packageName in selectedPackages }
+                com.example.link2sdclone.ui.BatchActions.execute(this, index, targets) { exitSelectionMode() }
             }
         }
-        popup.show()
     }
 
     private fun batchSetFrozen(target: Boolean) {
-        if (selectedPackages.isEmpty()) {
-            Toast.makeText(this, R.string.batch_no_selection, Toast.LENGTH_SHORT).show()
-            return
-        }
         val backends = FreezeManager.availableBackends(this)
         if (backends.isEmpty()) {
             showNoFreezeBackendDialog()
@@ -388,18 +388,25 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         }
         val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
         val targets = allApps.filter { it.packageName in selectedPackages }
-        var remaining = targets.size
-        if (remaining == 0) return
+        if (targets.isEmpty()) return
+        val total = targets.size
+        var remaining = total
+        var okCount = 0
 
         targets.forEach { app ->
             FreezeManager.setFrozen(this, backend, app.packageName, target) { result ->
+                // طلب الصلاحية ليس نتيجة نهائية: ننتظر النتيجة الحقيقية.
+                if (result is FreezeResult.PermissionRequested) return@setFrozen
                 runOnUiThread {
-                    if (result is FreezeResult.Success) app.isFrozen = target
+                    if (result is FreezeResult.Success) {
+                        app.isFrozen = target
+                        okCount++
+                    }
                     remaining--
                     if (remaining == 0) {
                         applyFilterAndSort()
                         exitSelectionMode()
-                        Toast.makeText(this, R.string.batch_action_done, Toast.LENGTH_SHORT).show()
+                        Toast.makeText(this, getString(R.string.st3_batch_result, okCount, total), Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -417,7 +424,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     private fun onContextAction(app: AppEntry, actionId: Int) {
         when (actionId) {
             R.id.ctx_move_sd -> {
-                Toast.makeText(this, "TODO: move ${app.packageName}", Toast.LENGTH_SHORT).show()
+                com.example.link2sdclone.ui.BatchActions.execute(this, 2, listOf(app)) { }
             }
             R.id.ctx_run -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(app.packageName)
@@ -578,9 +585,13 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
-        val app = pendingFreezeTarget ?: return
+        if (requestCode == com.example.link2sdclone.ui.BatchActions.REQ_QUEUE) {
+            com.example.link2sdclone.ui.BatchActions.nextInQueue(this)
+            return
+        }
         FreezeManager.onActivityResult(requestCode, resultCode) { result ->
-            onFreezeResult(app, !app.isFrozen, result)
+            val app = pendingFreezeTarget
+            if (app != null) onFreezeResult(app, !app.isFrozen, result)
         }
     }
 

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="st3_b_link">ربط إلى SD</string>
+    <string name="st3_b_unlink">قم بازالة الرابط</string>
+    <string name="st3_b_move_sd">انقل إلى ذاكرة البطاقة</string>
+    <string name="st3_b_move_phone">انقل إلى ذاكرة الهاتف</string>
+    <string name="st3_b_freeze">تجميد</string>
+    <string name="st3_b_unfreeze">إبطال التجميد</string>
+    <string name="st3_b_reinstall">إعادة تثبيت</string>
+    <string name="st3_b_delete">حذف</string>
+    <string name="st3_b_clear_data">محو البيانات</string>
+    <string name="st3_b_clear_cache">محو ذاكرة التخزين المؤقت</string>
+    <string name="st3_b_share">مشاركة</string>
+    <string name="st3_batch_result">تم تنفيذ العملية على %1$d من %2$d تطبيقًا</string>
+    <string name="st3_link_not_impl">محرك الربط لم يُكتب بعد في هذه النسخة، فلا يمكن ربط التطبيقات ولا إزالة ربطها الآن.</string>
+    <string name="st3_need_access">هذا الخيار يحتاج Root أو Shizuku. شغّل أحدهما وامنح التطبيق الصلاحية ثم أعد المحاولة.</string>
+    <string name="st3_shizuku_asked">طُلبت صلاحية Shizuku. امنحها ثم أعد المحاولة.</string>
+    <string name="st3_no_adopted">لم أجد بطاقة مهيأة كذاكرة داخلية على هذا الجهاز، فلا يمكن النقل إليها بهذه الطريقة.</string>
+    <string name="st3_confirm_delete">حذف %1$d تطبيق؟</string>
+    <string name="st3_confirm_clear_data">سيتم محو بيانات %1$d تطبيق نهائيًا. متابعة؟</string>
+    <string name="st3_confirm_clear_cache_shizuku">Shizuku لا يستطيع مسح مخبأ تطبيق واحد. سيُمسح مخبأ كل التطبيقات على الجهاز. متابعة؟</string>
+</resources>

@@ -1,5 +1,6 @@
 package com.example.link2sdclone.ui
 
+import android.content.Intent
 import androidx.drawerlayout.widget.DrawerLayout
 import com.example.link2sdclone.R
 import com.google.android.material.navigation.NavigationView
@@ -37,6 +38,9 @@ fun setupDrawer(
             R.id.nav_settings -> actions.onSettings()
             R.id.nav_about -> actions.onAbout()
             R.id.nav_groups -> actions.onGroups()
+            R.id.nav_root_tools -> navView.context.startActivity(
+                Intent(navView.context, RootToolsActivity::class.java)
+            )
         }
         item.isChecked = true
         drawerLayout.closeDrawers()

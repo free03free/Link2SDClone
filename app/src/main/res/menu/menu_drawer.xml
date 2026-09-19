@@ -33,6 +33,15 @@
         </menu>
     </item>
 
+    <item android:title="@string/rt_section">
+        <menu>
+            <item
+                android:id="@+id/nav_root_tools"
+                android:icon="@drawable/ic_root_tools"
+                android:title="@string/rt_title" />
+        </menu>
+    </item>
+
     <item android:title="@string/nav_section_tools">
         <menu>
             <item

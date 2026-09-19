@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="rt_title">أدوات الروت</string>
+    <string name="rt_section">متقدم</string>
+    <string name="rt_mode_checking">جارٍ فحص الأوضاع المتاحة…</string>
+    <string name="rt_mode_root">الوضع الحالي: Root</string>
+    <string name="rt_mode_shizuku">الوضع الحالي: Shizuku</string>
+    <string name="rt_mode_shizuku_perm">Shizuku يعمل لكن لم تُمنح الصلاحية بعد. اضغط أي خيار لطلبها.</string>
+    <string name="rt_mode_none">الوضع الحالي: لا Root ولا Shizuku. خيار «إعادة تحميل» فقط يعمل.</string>
+    <string name="rt_item_reload">إعادة تحميل</string>
+    <string name="rt_item_recreate_scripts">إعادة إنشاء تركيب السكريبتات</string>
+    <string name="rt_item_relink_apps">اعد ربط جميع ملفات التطبيقات</string>
+    <string name="rt_item_rebind_folders">Rebind all external folders</string>
+    <string name="rt_item_relink_lib">إعادة ربط ملفات المكتبة</string>
+    <string name="rt_item_link_dalvik">ربط ملفات ال dalvik-cache</string>
+    <string name="rt_item_clean_sd2">تنظيف القسم الثاني من ذاكرة البطاقة</string>
+    <string name="rt_item_clean_dalvik">تنظيف ال dalvik-cache</string>
+    <string name="rt_item_clear_caches">Clear all app caches</string>
+    <string name="rt_item_reboot">إعادة التشغيل</string>
+    <string name="rt_need_root">هذا الخيار يحتاج صلاحية Root، ولم يُعثر عليها في هذا الجهاز.</string>
+    <string name="rt_need_access">هذا الخيار يحتاج Root أو Shizuku. شغّل Shizuku ثم امنح التطبيق الصلاحية.</string>
+    <string name="rt_shizuku_asked">طُلبت صلاحية Shizuku. امنحها ثم ارجع واضغط الخيار مرة أخرى.</string>
+    <string name="rt_sd2_found_not_impl">القسم الثاني موجود، لكن هذه العملية لم تُنفَّذ بعد في هذه النسخة.</string>
+    <string name="rt_dalvik_not_impl">لم يُفعَّل هذا الخيار بعد، لأن حذف dalvik-cache على نظام يعمل قد يبطئ الإقلاع أو يسبب مشاكل.</string>
+    <string name="rt_reboot_confirm">هل تريد إعادة تشغيل الهاتف الآن؟</string>
+    <string name="rt_running">جارٍ التنفيذ…</string>
+    <string name="rt_done">تم تنفيذ الأمر</string>
+    <string name="rt_failed">فشل الأمر</string>
+</resources>
