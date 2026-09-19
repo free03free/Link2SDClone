@@ -13,7 +13,6 @@ interface DrawerActions {
     fun onStorageInfo()
     fun onSettings()
     fun onAbout()
-    fun onFreezeSnapshotToggle()
     fun onGroups()
 }
 
@@ -37,7 +36,6 @@ fun setupDrawer(
             R.id.nav_storage_info -> actions.onStorageInfo()
             R.id.nav_settings -> actions.onSettings()
             R.id.nav_about -> actions.onAbout()
-            R.id.nav_freeze_snapshot -> actions.onFreezeSnapshotToggle()
             R.id.nav_groups -> actions.onGroups()
         }
         item.isChecked = true

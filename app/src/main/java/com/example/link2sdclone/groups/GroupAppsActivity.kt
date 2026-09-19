@@ -25,7 +25,11 @@ class GroupAppsActivity : AppCompatActivity() {
     private lateinit var selected: MutableSet<String>
     private lateinit var recyclerView: RecyclerView
     private var allInstalledApps: List<ApplicationInfo> = emptyList()
-    private var currentFilterIndex = 0
+    // يُحفظ في التخزين فيبقى بعد إغلاق التطبيق (قيمة واحدة لكل المجموعات)
+    private val uiPrefs by lazy { getSharedPreferences("ui_state", MODE_PRIVATE) }
+    private var currentFilterIndex: Int
+        get() = uiPrefs.getInt("group_apps_filter_index", 0)
+        set(value) { uiPrefs.edit().putInt("group_apps_filter_index", value).apply() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,7 +57,7 @@ class GroupAppsActivity : AppCompatActivity() {
         applyFilter()
 
         findViewById<Button>(R.id.btn_filter_group).setOnClickListener {
-            showFilterDialog(this, currentFilterIndex, R.array.group_filter_options) { index ->
+            showFilterDialog(this, it, currentFilterIndex, R.array.group_filter_options) { index ->
                 currentFilterIndex = index
                 applyFilter()
             }

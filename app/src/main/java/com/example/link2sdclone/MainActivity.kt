@@ -61,8 +61,14 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     private lateinit var toolbarSearch: Toolbar
     private lateinit var searchInput: EditText
     private var allApps: List<AppEntry> = emptyList()
-    private var currentFilterIndex = 5
-    private var currentSortIndex = 0
+    // تُحفظ في التخزين فتبقى بعد إغلاق التطبيق
+    private val uiPrefs by lazy { getSharedPreferences("ui_state", MODE_PRIVATE) }
+    private var currentFilterIndex: Int
+        get() = uiPrefs.getInt("main_filter_index", 5)
+        set(value) { uiPrefs.edit().putInt("main_filter_index", value).apply() }
+    private var currentSortIndex: Int
+        get() = uiPrefs.getInt("main_sort_index", 0)
+        set(value) { uiPrefs.edit().putInt("main_sort_index", value).apply() }
 
     private var isSelectionMode = false
     private val selectedPackages = mutableSetOf<String>()
@@ -105,11 +111,18 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         val navView = findViewById<NavigationView>(R.id.nav_view)
         toolbar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         setupDrawer(navView, drawerLayout, this)
-        updateDrawerFreezeLabel() // يعكس اللقطة المحفوظة سابقًا فورًا عند فتح التطبيق
         headerCount = findViewById(R.id.list_header_count)
 
         val recyclerView = findViewById<RecyclerView>(R.id.app_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
+        recyclerView.addItemDecoration(
+            androidx.recyclerview.widget.DividerItemDecoration(
+                this, androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
+            ).apply {
+                androidx.core.content.ContextCompat.getDrawable(this@MainActivity, R.drawable.divider_thin)
+                    ?.let { setDrawable(it) }
+            }
+        )
         adapter = AppListAdapter(
             items = emptyList(),
             onClick = { app -> openAppDetails(app) },
@@ -120,13 +133,22 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         recyclerView.adapter = adapter
 
         findViewById<ImageButton>(R.id.icon_filter).setOnClickListener {
-            showFilterDialog(this, currentFilterIndex) { index ->
+            showFilterDialog(this, it, currentFilterIndex) { index ->
                 currentFilterIndex = index
                 applyFilterAndSort()
             }
         }
+        findViewById<ImageButton>(R.id.icon_refresh).setOnClickListener {
+            loadInstalledApps()
+            Toast.makeText(
+                this,
+                "تم التحديث: ${allApps.size} تطبيق، ${allApps.count { it.isFrozen }} مجمّد",
+                Toast.LENGTH_SHORT
+            ).show()
+        }
+
         findViewById<ImageButton>(R.id.icon_sort).setOnClickListener {
-            showSortDialog(this, currentSortIndex) { index ->
+            showSortDialog(this, it, currentSortIndex) { index ->
                 currentSortIndex = index
                 applyFilterAndSort()
             }
@@ -192,6 +214,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 isSystemApp = isSystem,
                 isOnSdCard = info.sourceDir.contains("/mnt/") || info.sourceDir.contains("/storage/"),
                 isFrozen = isFrozen,
+                isFavorite = com.example.link2sdclone.util.FavoritesManager.isFavorite(this, info.packageName),
                 firstInstallTime = pkgInfo?.firstInstallTime ?: 0L,
                 lastUpdateTime = pkgInfo?.lastUpdateTime ?: 0L
             )
@@ -250,8 +273,16 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         headerCount.text = getString(R.string.in_phone_memory_apps, list.size)
     }
 
+    override fun onResume() {
+        super.onResume()
+        // النجمة قد تتغير من شاشة معلومات التطبيق
+        allApps.forEach { it.isFavorite = com.example.link2sdclone.util.FavoritesManager.isFavorite(this, it.packageName) }
+        applyFilterAndSort()
+    }
+
     private fun toggleFavorite(app: AppEntry) {
         app.isFavorite = !app.isFavorite
+        com.example.link2sdclone.util.FavoritesManager.set(this, app.packageName, app.isFavorite)
         applyFilterAndSort()
     }
 
@@ -373,77 +404,6 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 }
             }
         }
-    }
-
-    // ---------------------------------------------------------------------
-    // Freeze snapshot: single dynamic button. First press saves which apps
-    // are currently frozen and unfreezes all of them; second press
-    // re-freezes exactly that saved set and clears the snapshot. Never
-    // touches any app that wasn't already frozen by the user beforehand.
-    // ---------------------------------------------------------------------
-
-    private fun onFreezeSnapshotToggleAction() {
-        val backends = FreezeManager.availableBackends(this)
-        if (backends.isEmpty()) { showNoFreezeBackendDialog(); return }
-        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
-
-        if (com.example.link2sdclone.freeze.FreezeSnapshotManager.hasSnapshot(this)) {
-            val saved = com.example.link2sdclone.freeze.FreezeSnapshotManager.get(this)
-            val targets = allApps.filter { it.packageName in saved }
-            if (targets.isEmpty()) {
-                com.example.link2sdclone.freeze.FreezeSnapshotManager.clear(this)
-                updateDrawerFreezeLabel()
-                return
-            }
-            var remaining = targets.size
-            targets.forEach { app ->
-                FreezeManager.setFrozen(this, backend, app.packageName, true) { result ->
-                    runOnUiThread {
-                        if (result is FreezeResult.Success) app.isFrozen = true
-                        remaining--
-                        if (remaining == 0) {
-                            com.example.link2sdclone.freeze.FreezeSnapshotManager.clear(this)
-                            applyFilterAndSort()
-                            updateDrawerFreezeLabel()
-                            Toast.makeText(this, R.string.freeze_snapshot_restored, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-        } else {
-            val frozenNow = allApps.filter { it.isFrozen }.map { it.packageName }.toSet()
-            if (frozenNow.isEmpty()) {
-                Toast.makeText(this, R.string.freeze_snapshot_nothing_frozen, Toast.LENGTH_SHORT).show()
-                return
-            }
-            com.example.link2sdclone.freeze.FreezeSnapshotManager.save(this, frozenNow)
-            val targets = allApps.filter { it.packageName in frozenNow }
-            var remaining = targets.size
-            targets.forEach { app ->
-                FreezeManager.setFrozen(this, backend, app.packageName, false) { result ->
-                    runOnUiThread {
-                        if (result is FreezeResult.Success) app.isFrozen = false
-                        remaining--
-                        if (remaining == 0) {
-                            applyFilterAndSort()
-                            updateDrawerFreezeLabel()
-                            Toast.makeText(this, R.string.freeze_snapshot_saved, Toast.LENGTH_SHORT).show()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /** Call after setupDrawer(...) in onCreate, and this function updates
-     *  itself after every snapshot action above -- no other wiring needed. */
-    private fun updateDrawerFreezeLabel() {
-        val navView = findViewById<com.google.android.material.navigation.NavigationView>(R.id.nav_view) ?: return
-        val item = navView.menu.findItem(R.id.nav_freeze_snapshot) ?: return
-        item.title = if (com.example.link2sdclone.freeze.FreezeSnapshotManager.hasSnapshot(this))
-            getString(R.string.nav_freeze_snapshot_restore)
-        else
-            getString(R.string.nav_freeze_snapshot_save)
     }
 
     private fun onGroupsAction() {
@@ -660,6 +620,5 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     override fun onOnPhone() { currentFilterIndex = 5; applyFilterAndSort() }
     override fun onFrozen() { currentFilterIndex = 7; applyFilterAndSort() }
     override fun onFavorites() { currentFilterIndex = 6; applyFilterAndSort() }
-    override fun onFreezeSnapshotToggle() = onFreezeSnapshotToggleAction()
     override fun onGroups() = onGroupsAction()
 }

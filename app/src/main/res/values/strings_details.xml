@@ -21,11 +21,6 @@
     <string name="files_last_update">آخر تحديث</string>
     <string name="files_no_browser_notice">تصفح ملفات بيانات تطبيقات أخرى غير متاح بدون صلاحية Root. المعلومات أدناه هي كل ما يسمح نظام أندرويد بالوصول إليه لتطبيق طرف ثالث.</string>
     <string name="settings_cache_exclude">استثناء تطبيقات من التذكير</string>
-    <string name="nav_freeze_snapshot_save">حفظ لقطة وفكّ التجميد مؤقتًا</string>
-    <string name="nav_freeze_snapshot_restore">استعادة اللقطة (إعادة التجميد)</string>
-    <string name="freeze_snapshot_saved">تم حفظ اللقطة وإلغاء تجميد التطبيقات</string>
-    <string name="freeze_snapshot_restored">تم استعادة اللقطة وإعادة التجميد</string>
-    <string name="freeze_snapshot_nothing_frozen">لا توجد تطبيقات مجمّدة حاليًا</string>
 
     <string name="nav_groups">المجموعات</string>
     <string name="groups_title">المجموعات</string>

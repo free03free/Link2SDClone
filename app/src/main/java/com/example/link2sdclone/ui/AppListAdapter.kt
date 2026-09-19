@@ -1,5 +1,9 @@
 package com.example.link2sdclone.ui
 
+import android.graphics.Color
+import android.text.SpannableStringBuilder
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +44,20 @@ class AppListAdapter(
     override fun onBindViewHolder(holder: RowHolder, position: Int) {
         val app = items[position]
         holder.icon.setImageDrawable(app.icon ?: holder.icon.context.getDrawable(R.drawable.ic_android_default))
-        holder.name.text = app.label
+        holder.name.text = if (app.isFrozen) {
+            val frozenTag = "-" + holder.itemView.context.getString(R.string.filter_frozen) + "-"
+            val sb = SpannableStringBuilder(app.label)
+            sb.append(" ")
+            val start = sb.length
+            sb.append(frozenTag)
+            sb.setSpan(
+                ForegroundColorSpan(Color.parseColor("#03A9F4")),
+                start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+            )
+            sb
+        } else {
+            app.label
+        }
         holder.path.text = app.apkPath
         holder.sizes.text = holder.itemView.context.getString(
             R.string.row_sizes_format,

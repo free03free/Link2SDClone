@@ -39,7 +39,7 @@ class GroupsActivity : AppCompatActivity() {
         }
 
         findViewById<Button>(R.id.btn_sort_groups).setOnClickListener {
-            showSortDialog()
+            showSortDialog(it)
         }
 
         refreshList()
@@ -131,7 +131,7 @@ class GroupsActivity : AppCompatActivity() {
             .show()
     }
 
-    private fun showSortDialog() {
+    private fun showSortDialog(anchor: android.view.View) {
         val labels = arrayOf(
             getString(R.string.group_sort_name),
             getString(R.string.group_sort_created),
@@ -147,15 +147,12 @@ class GroupsActivity : AppCompatActivity() {
         val current = GroupsManager.getSortMode(this)
         val checkedIndex = values.indexOf(current).coerceAtLeast(0)
 
-        AlertDialog.Builder(this)
-            .setTitle(R.string.group_sort_title)
-            .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
-                GroupsManager.setSortMode(this, values[which])
-                refreshList()
-                dialog.dismiss()
-            }
-            .setNegativeButton(R.string.group_cancel, null)
-            .show()
+        com.example.link2sdclone.ui.showChoicePopup(
+            this, anchor, labels.toList().toTypedArray(), checkedIndex
+        ) { index ->
+            GroupsManager.setSortMode(this, values[index])
+            refreshList()
+        }
     }
 
     private fun confirmDelete(name: String) {

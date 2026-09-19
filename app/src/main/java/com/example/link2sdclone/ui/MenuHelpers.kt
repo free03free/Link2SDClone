@@ -21,17 +21,16 @@ import com.example.link2sdclone.model.AppEntry
  */
 fun showFilterDialog(
     context: Context,
+    anchor: View,
     currentSelection: Int,
     optionsArrayRes: Int = R.array.filter_options,
     onFilterSelected: (Int) -> Unit
 ) {
-    val options = context.resources.getStringArray(optionsArrayRes)
-    AlertDialog.Builder(context)
-        .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-            onFilterSelected(which)
-            dialog.dismiss()
-        }
-        .show()
+    showChoicePopup(
+        context, anchor,
+        context.resources.getStringArray(optionsArrayRes),
+        currentSelection, onFilterSelected
+    )
 }
 
 /**
@@ -39,16 +38,101 @@ fun showFilterDialog(
  */
 fun showSortDialog(
     context: Context,
+    anchor: View,
     currentSelection: Int,
     onSortSelected: (Int) -> Unit
 ) {
-    val options = context.resources.getStringArray(R.array.sort_options)
-    AlertDialog.Builder(context)
-        .setSingleChoiceItems(options, currentSelection) { dialog, which ->
-            onSortSelected(which)
-            dialog.dismiss()
+    showChoicePopup(
+        context, anchor,
+        context.resources.getStringArray(R.array.sort_options),
+        currentSelection, onSortSelected
+    )
+}
+
+/**
+ * قائمة اختيار مفرد مخصصة مثل Link2SD الأصلي: دائرة Radio ثم نص،
+ * عرض يتبع أطول نص، بلا خطوط فاصلة، ملتصقة بأسفل الشريط وبالحافة اليمنى.
+ */
+fun showChoicePopup(
+    context: Context,
+    anchor: View,
+    options: Array<String>,
+    currentSelection: Int,
+    onSelected: (Int) -> Unit
+) {
+    val metrics = context.resources.displayMetrics
+    fun dp(v: Int): Int = (v * metrics.density).toInt()
+
+    val container = LinearLayout(context).apply {
+        orientation = LinearLayout.VERTICAL
+        layoutDirection = View.LAYOUT_DIRECTION_RTL
+        setBackgroundColor(android.graphics.Color.WHITE)
+        setPadding(0, dp(4), 0, dp(4))
+    }
+
+    val ta = context.obtainStyledAttributes(intArrayOf(android.R.attr.selectableItemBackground))
+    val rowBgRes = ta.getResourceId(0, 0)
+    ta.recycle()
+
+    lateinit var popup: PopupWindow
+
+    options.forEachIndexed { i, title ->
+        val row = LinearLayout(context).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = android.view.Gravity.CENTER_VERTICAL
+            minimumHeight = dp(48)
+            setPadding(dp(16), 0, dp(16), 0)
+            isClickable = true
+            if (rowBgRes != 0) setBackgroundResource(rowBgRes)
+            setOnClickListener {
+                popup.dismiss()
+                onSelected(i)
+            }
         }
-        .show()
+        val radio = androidx.appcompat.widget.AppCompatRadioButton(context).apply {
+            isChecked = (i == currentSelection)
+            isClickable = false
+            isFocusable = false
+        }
+        val label = TextView(context).apply {
+            text = title
+            textSize = 16f
+            setTextColor(android.graphics.Color.parseColor("#212121"))
+            setPaddingRelative(dp(4), 0, 0, 0)
+        }
+        row.addView(radio)
+        row.addView(label)
+        container.addView(row)
+    }
+
+    container.measure(
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+        View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+    )
+    val popupWidth = minOf(container.measuredWidth, metrics.widthPixels)
+    val popupHeight = minOf(container.measuredHeight, (metrics.heightPixels * 0.7f).toInt())
+
+    val scrollView = ScrollView(context).apply {
+        addView(container, ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT))
+    }
+
+    popup = PopupWindow(scrollView, popupWidth, popupHeight, true).apply {
+        isOutsideTouchable = true
+        setBackgroundDrawable(ColorDrawable(android.graphics.Color.WHITE))
+        if (android.os.Build.VERSION.SDK_INT >= 21) elevation = dp(8).toFloat()
+    }
+
+    // ابحث عن الشريط العلوي لنلتصق بأسفله وبحافته اليمنى؛ وإلا فبالزر نفسه.
+    var host: View = anchor
+    var v: View? = anchor.parent as? View
+    while (v != null) {
+        if (v is androidx.appcompat.widget.Toolbar) { host = v; break }
+        v = v.parent as? View
+    }
+    androidx.core.widget.PopupWindowCompat.showAsDropDown(
+        popup, host, 0, 0, android.view.Gravity.RIGHT
+    )
 }
 
 /**

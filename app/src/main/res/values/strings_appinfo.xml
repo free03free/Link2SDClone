@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="appinfo_title">معلومات التطبيق</string>
+    <string name="appinfo_favorite">المفضلة</string>
+    <string name="appinfo_system_info">معلومات النظام</string>
+    <string name="appinfo_run">تشغيل التطبيق</string>
+    <string name="appinfo_play">عرض في Google Play</string>
+    <string name="appinfo_version">الإصدار: %1$s (code:%2$d)</string>
+    <string name="appinfo_date">تاريخ: %1$s</string>
+    <string name="appinfo_cannot_run">لا يمكن تشغيل هذا التطبيق</string>
+    <string name="appinfo_cannot_open">تعذر فتح الصفحة</string>
+    <string name="storage_row_app">تطبيق</string>
+    <string name="storage_app2sd_title">أندرويد App2SD</string>
+    <string name="storage_move_to_sd">انقل إلى ذاكرة البطاقة</string>
+    <string name="storage_move_to_phone">انقل إلى ذاكرة الهاتف</string>
+</resources>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="sd2_not_found_msg">لم يتم العثور على القسم الثاني من بطاقة الذاكرة</string>
+    <string name="sd2_btn_link">ربط إلى SD</string>
+    <string name="sd2_btn_unlink">قم بازالة الرابط</string>
+</resources>
