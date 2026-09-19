@@ -165,7 +165,7 @@ object GroupsManager {
         val pm = context.packageManager
         return pkgs.all { pkg ->
             try {
-                !pm.getApplicationInfo(pkg, PackageManager.MATCH_DISABLED_COMPONENTS).enabled
+                isPackageFrozen(context, pkg)
             } catch (e: Exception) {
                 false
             }
@@ -178,11 +178,54 @@ object GroupsManager {
         val pm = context.packageManager
         val frozen = pkgs.count { pkg ->
             try {
-                !pm.getApplicationInfo(pkg, PackageManager.MATCH_DISABLED_COMPONENTS).enabled
+                isPackageFrozen(context, pkg)
             } catch (e: Exception) {
                 false
             }
         }
         return frozen to pkgs.size
+    }
+
+    /**
+     * نفس أسلوب Ice Box في قراءة حالة التجميد:
+     *  1) معطّل عبر pm disable-user  -> enabled=false أو getApplicationEnabledSetting = 2/3
+     *  2) مخفي (Island / Device Owner) -> privateFlags & 0x8000000 (القيمة التي يستخدمها Ice Box)
+     * التطبيق المخفي يحتاج MATCH_UNINSTALLED_PACKAGES وإلا يُرمى NameNotFoundException.
+     */
+    private val privateFlagsField: java.lang.reflect.Field? by lazy {
+        try {
+            android.content.pm.ApplicationInfo::class.java
+                .getDeclaredField("privateFlags").apply { isAccessible = true }
+        } catch (t: Throwable) {
+            null
+        }
+    }
+
+    /** خيار الإعدادات: هل تُعتبر التطبيقات المخفية (Island) مجمّدة وتظهر في القوائم. */
+    fun showHiddenFrozen(context: Context): Boolean =
+        androidx.preference.PreferenceManager.getDefaultSharedPreferences(context)
+            .getBoolean("pref_show_hidden_frozen", true)
+
+    fun isPackageFrozen(context: Context, pkg: String): Boolean {
+        val pm = context.packageManager
+        val info = try {
+            pm.getApplicationInfo(
+                pkg,
+                PackageManager.MATCH_DISABLED_COMPONENTS or PackageManager.MATCH_UNINSTALLED_PACKAGES
+            )
+        } catch (e: Exception) {
+            return false
+        }
+        if (!info.enabled) return true
+        if ((info.flags and android.content.pm.ApplicationInfo.FLAG_SUSPENDED) != 0) return true
+        val pf = try { privateFlagsField?.getInt(info) ?: 0 } catch (t: Throwable) { 0 }
+        if (showHiddenFrozen(context) && (pf and 1) != 0) return true  // PRIVATE_FLAG_HIDDEN (مؤكد بالقيم الخام على هذا الجهاز)
+        return try {
+            val st = pm.getApplicationEnabledSetting(pkg)
+            st == PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+                st == PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER
+        } catch (e: Exception) {
+            false
+        }
     }
 }

@@ -166,15 +166,17 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         // drawer always showed an empty list even when apps were genuinely
         // frozen at the system level.
         val installed = pm.getInstalledApplications(
-            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
-        )
+            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS or
+                (if (com.example.link2sdclone.groups.GroupsManager.showHiddenFrozen(this)) PackageManager.MATCH_UNINSTALLED_PACKAGES else 0)
+        ).filter { (it.flags and ApplicationInfo.FLAG_INSTALLED) != 0 ||
+            com.example.link2sdclone.groups.GroupsManager.isPackageFrozen(this, it.packageName) }
 
         val hasUsageAccess = StorageStatsHelper.hasUsageAccess(this)
 
         allApps = installed.map { info ->
             val apkFile = File(info.sourceDir)
             val isSystem = (info.flags and ApplicationInfo.FLAG_SYSTEM) != 0
-            val isFrozen = !info.enabled
+            val isFrozen = com.example.link2sdclone.groups.GroupsManager.isPackageFrozen(this, info.packageName)
             val pkgInfo = try { pm.getPackageInfo(info.packageName, 0) } catch (e: Exception) { null }
             val realSizes = if (hasUsageAccess) StorageStatsHelper.queryRealSizes(this, info.uid) else null
             AppEntry(

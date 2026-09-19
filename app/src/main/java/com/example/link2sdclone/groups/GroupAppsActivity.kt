@@ -44,8 +44,9 @@ class GroupAppsActivity : AppCompatActivity() {
         // التطبيقات المجمدة من القائمة بصمت، فتختفي التطبيقات اللي جمدتها
         // للتو في نفس المجموعة.
         allInstalledApps = pm.getInstalledApplications(
-            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
-        ).sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
+            PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS or (if (GroupsManager.showHiddenFrozen(this)) PackageManager.MATCH_UNINSTALLED_PACKAGES else 0)
+        ).filter { (it.flags and ApplicationInfo.FLAG_INSTALLED) != 0 || GroupsManager.isPackageFrozen(this, it.packageName) }
+        .sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
 
         recyclerView = findViewById(R.id.group_apps_list)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -75,9 +76,9 @@ class GroupAppsActivity : AppCompatActivity() {
             2 -> allInstalledApps.filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
             4 -> allInstalledApps.filter { it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/") }
             5 -> allInstalledApps.filter { !(it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/")) }
-            7 -> allInstalledApps.filter { !it.enabled }
+            7 -> allInstalledApps.filter { GroupsManager.isPackageFrozen(this, it.packageName) }
             // خاص بهذه الشاشة فقط: التطبيقات المجمدة داخل هذه المجموعة تحديداً
-            11 -> allInstalledApps.filter { it.packageName in selected && !it.enabled }
+            11 -> allInstalledApps.filter { it.packageName in selected && GroupsManager.isPackageFrozen(this, it.packageName) }
             0 -> allInstalledApps
             else -> {
                 Toast.makeText(this, R.string.group_filter_unsupported, Toast.LENGTH_SHORT).show()

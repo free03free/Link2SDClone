@@ -126,6 +126,12 @@
             android:entryValues="@array/freeze_backend_values"
             android:defaultValue="auto" />
 
+        <CheckBoxPreference
+            android:key="pref_show_hidden_frozen"
+            android:title="إظهار التطبيقات المخفية (المجمّدة بواسطة Island)"
+            android:summary="عند التعطيل لا تُقرأ حالة الإخفاء، وتختفي هذه التطبيقات من القوائم. أعد فتح التطبيق بعد التغيير."
+            android:defaultValue="true" />
+
     </PreferenceCategory>
 
     <!-- الأمان -->
