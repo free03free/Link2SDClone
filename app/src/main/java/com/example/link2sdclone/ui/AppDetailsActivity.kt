@@ -47,7 +47,9 @@ class AppDetailsActivity : AppCompatActivity() {
             toolbar.menu.getItem(i).icon?.mutate()?.setTint(Color.WHITE)
         }
         toolbar.setOnMenuItemClickListener { onDetailsMenuItem(it.itemId) }
+        toolbar.setOnClickListener { }
         updateFavoriteIcon()
+        updateFreezeTitle()
         bindHeader()
 
         val pager = findViewById<ViewPager2>(R.id.details_pager)
@@ -89,6 +91,18 @@ class AppDetailsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        updateFavoriteIcon()
+        updateFreezeTitle()
+    }
+
+    private fun updateFreezeTitle() {
+        val frozen = com.example.link2sdclone.groups.GroupsManager.isPackageFrozen(this, packageNameArg)
+        toolbar.menu.findItem(R.id.details_freeze)?.title =
+            getString(if (frozen) R.string.ctx_unfreeze else R.string.ctx_freeze)
+    }
+
     private fun updateFavoriteIcon() {
         val fav = FavoritesManager.isFavorite(this, packageNameArg)
         toolbar.menu.findItem(R.id.details_favorite)?.icon = ContextCompat.getDrawable(
@@ -121,6 +135,71 @@ class AppDetailsActivity : AppCompatActivity() {
             }
             true
         }
+        R.id.details_reinstall -> {
+            try {
+                val path = packageManager.getApplicationInfo(packageNameArg, PackageManager.MATCH_UNINSTALLED_PACKAGES).sourceDir
+                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", java.io.File(path))
+                openIntent(Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, "application/vnd.android.package-archive")
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                })
+            } catch (e: Exception) {
+                Toast.makeText(this, R.string.freeze_failed, Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+        R.id.details_delete -> {
+            openIntent(Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageNameArg")))
+            true
+        }
+        R.id.details_freeze -> {
+            handleFreezeToggleForCurrent()
+            true
+        }
+        R.id.details_convert_system -> {
+            Toast.makeText(this, "يتطلب صلاحية Root", Toast.LENGTH_SHORT).show()
+            true
+        }
+        R.id.details_clear_data -> {
+            openIntent(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageNameArg, null)))
+            true
+        }
+        R.id.details_clear_cache -> {
+            openIntent(Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS, Uri.fromParts("package", packageNameArg, null)))
+            true
+        }
+        R.id.details_share -> {
+            val label = try {
+                packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageNameArg, 0))
+            } catch (e: Exception) { packageNameArg }
+            val text = "$label - $packageNameArg\nhttps://play.google.com/store/apps/details?id=$packageNameArg"
+            openIntent(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, text)
+            }, label))
+            true
+        }
+        R.id.details_share_apk -> {
+            try {
+                val path = packageManager.getApplicationInfo(packageNameArg, PackageManager.MATCH_UNINSTALLED_PACKAGES).sourceDir
+                val label = try {
+                    packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageNameArg, 0))
+                } catch (e: Exception) { packageNameArg }
+                val uri = androidx.core.content.FileProvider.getUriForFile(this, "$packageName.fileprovider", java.io.File(path))
+                openIntent(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+                    type = "application/vnd.android.package-archive"
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }, label))
+            } catch (e: Exception) {
+                Toast.makeText(this, R.string.freeze_failed, Toast.LENGTH_SHORT).show()
+            }
+            true
+        }
+        R.id.details_create_shortcut -> {
+            createLaunchShortcutForCurrent()
+            true
+        }
         else -> false
     }
 
@@ -130,6 +209,82 @@ class AppDetailsActivity : AppCompatActivity() {
         } catch (e: Exception) {
             Toast.makeText(this, R.string.appinfo_cannot_open, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    // ---------------------------------------------------------------------
+    // Freeze (نسخة مبسطة لتطبيق واحد، بلا الحاجة لـ pendingFreezeTarget الخاص بالقوائم المتعددة)
+    // ---------------------------------------------------------------------
+    private fun handleFreezeToggleForCurrent() {
+        val backends = com.example.link2sdclone.freeze.FreezeManager.availableBackends(this)
+        if (backends.isEmpty()) {
+            android.app.AlertDialog.Builder(this)
+                .setTitle(R.string.freeze_no_backend_title)
+                .setMessage(R.string.freeze_no_backend_message)
+                .setPositiveButton(android.R.string.ok, null)
+                .show()
+            return
+        }
+        val backend = com.example.link2sdclone.freeze.FreezeManager.preferredBackend?.takeIf { it in backends }
+            ?: backends.first()
+        val wantFrozen = !com.example.link2sdclone.groups.GroupsManager.isPackageFrozen(this, packageNameArg)
+        Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
+        com.example.link2sdclone.freeze.FreezeManager.setFrozen(this, backend, packageNameArg, wantFrozen) { result ->
+            runOnUiThread {
+                if (isFinishing) return@runOnUiThread
+                when (result) {
+                    is com.example.link2sdclone.freeze.FreezeResult.Success -> {
+                        updateFreezeTitle()
+                        Toast.makeText(
+                            this,
+                            if (wantFrozen) R.string.freeze_success_frozen else R.string.freeze_success_unfrozen,
+                            Toast.LENGTH_SHORT
+                        ).show()
+                    }
+                    is com.example.link2sdclone.freeze.FreezeResult.BackendNotAvailable -> {
+                        android.app.AlertDialog.Builder(this)
+                            .setTitle(R.string.freeze_no_backend_title)
+                            .setMessage(R.string.freeze_no_backend_message)
+                            .setPositiveButton(android.R.string.ok, null)
+                            .show()
+                    }
+                    is com.example.link2sdclone.freeze.FreezeResult.PermissionRequested -> { /* ننتظر رد الصلاحية */ }
+                    else -> Toast.makeText(this, R.string.freeze_failed, Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // إنشاء اختصار (نسخة مبنية من packageNameArg مباشرة)
+    // ---------------------------------------------------------------------
+    private fun createLaunchShortcutForCurrent() {
+        val launchIntent = packageManager.getLaunchIntentForPackage(packageNameArg) ?: run {
+            Toast.makeText(this, "لا يمكن إنشاء اختصار لهذا التطبيق", Toast.LENGTH_SHORT).show()
+            return
+        }
+        val appIcon = try { packageManager.getApplicationIcon(packageNameArg) } catch (e: Exception) { null }
+        val icon = appIcon?.let {
+            androidx.core.graphics.drawable.IconCompat.createWithBitmap(drawableToBitmapLocal(it))
+        } ?: androidx.core.graphics.drawable.IconCompat.createWithResource(this, R.drawable.ic_android_default)
+        val label = try {
+            packageManager.getApplicationLabel(packageManager.getApplicationInfo(packageNameArg, 0))
+        } catch (e: Exception) { packageNameArg }
+        val shortcut = androidx.core.content.pm.ShortcutInfoCompat.Builder(this, packageNameArg)
+            .setShortLabel(label)
+            .setIcon(icon)
+            .setIntent(launchIntent.apply { action = Intent.ACTION_MAIN })
+            .build()
+        androidx.core.content.pm.ShortcutManagerCompat.requestPinShortcut(this, shortcut, null)
+    }
+
+    private fun drawableToBitmapLocal(drawable: android.graphics.drawable.Drawable): android.graphics.Bitmap {
+        val width = drawable.intrinsicWidth.coerceAtLeast(1)
+        val height = drawable.intrinsicHeight.coerceAtLeast(1)
+        val bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888)
+        val canvas = android.graphics.Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.width, canvas.height)
+        drawable.draw(canvas)
+        return bitmap
     }
 
     private class DetailsPagerAdapter(activity: FragmentActivity, private val packageName: String) :

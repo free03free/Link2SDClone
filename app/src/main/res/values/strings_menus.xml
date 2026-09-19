@@ -56,7 +56,7 @@
     <string name="freeze_backend_shizuku">Shizuku</string>
     <string name="freeze_backend_island">Island</string>
     <string name="freeze_no_backend_title">لا يوجد مزود تجميد</string>
-    <string name="freeze_no_backend_message">التجميد بدون صلاحية Root يتطلب تثبيت Shizuku (وتفعيله) أو تثبيت Island (وتفعيل وضع Managed Mainland). ثبّت أحدهما ثم أعد المحاولة.</string>
+    <string name="freeze_no_backend_message">لا يوجد مزود تجميد متاح. شغّل Root (وامنح التطبيق الصلاحية) أو Shizuku (وفعّله) أو ثبّت Island (وفعّل وضع Managed Mainland)، ثم أعد المحاولة.</string>
     <string name="freeze_shizuku_permission_denied">تم رفض صلاحية Shizuku</string>
     <string name="freeze_island_permission_denied">تم رفض صلاحية Island</string>
     <string name="freeze_failed">تعذّر تنفيذ العملية</string>
@@ -67,7 +67,7 @@
     <!-- Toolbar extra -->
     <string name="menu_filter">فلترة</string>
     <string name="menu_sort">فرز</string>
-    <string name="app_name">Link2SD</string>
+    <string name="app_name">FreeLinkSD</string>
     <string name="in_phone_memory_apps">في ذاكرة الهاتف تطبيقات (%1$d)</string>
 
     <!-- Navigation drawer -->

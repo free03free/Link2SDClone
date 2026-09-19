@@ -156,7 +156,7 @@ object FreezeManager {
         if (packageName == context.packageName) return FreezeResult.Failed("root_self_package")
         if (!Regex("[A-Za-z0-9_.]+").matches(packageName)) return FreezeResult.Failed("root_bad_package")
         val cmd = if (freeze) "pm disable-user --user 0 $packageName" else "pm enable --user 0 $packageName"
-        val r = PrivilegedShell.run(PrivilegedShell.Mode.ROOT, cmd)
+        val r = PrivilegedShell.runFast(cmd)
         if (!r.ok) return FreezeResult.Failed("root_call_failed: " + r.output.take(100))
         // نتحقق من الحالة الحقيقية في النظام، لا من نجاح الأمر فقط.
         val state = try {

@@ -240,18 +240,20 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         // الترتيب يطابق filter_options الحقيقي بـ arrays_filter.xml (11 عنصر):
         // 0 الكل,1 نظام,2 مستخدم,3 مرتبط,4 على SD,5 على الهاتف,
         // 6 مفضلة,7 مجمّد,8 قابل للنقل,9 محدّث,10 مشفّر
-        if (currentFilterIndex == 3 || currentFilterIndex == 10) {
+        if (currentFilterIndex == 10) {
             // "مرتبط" و"مشفّر": التطبيق ما عنده نظام ربط حقيقي ولا وصول لحالة
             // التشفير بدون Root، فما فيه فلترة صحيحة نسويها -- بدل ما نعرض
             // نتيجة غلط، منبّه المستخدم ونرجع لعرض الكل.
             Toast.makeText(this, "هذا الفلتر يحتاج صلاحية Root وغير مدعوم حاليًا", Toast.LENGTH_SHORT).show()
             currentFilterIndex = 0
         }
+        val linkedSet = com.example.link2sdclone.util.LinkEngine.linkedPackages(this)
         var list = when (currentFilterIndex) {
+            3 -> allApps.filter { it.packageName in linkedSet }
             1 -> allApps.filter { it.isSystemApp }
             2 -> allApps.filter { !it.isSystemApp }
-            4 -> allApps.filter { it.isOnSdCard }
-            5 -> allApps.filter { !it.isOnSdCard }
+            4 -> allApps.filter { it.isOnSdCard || it.packageName in linkedSet }
+            5 -> allApps.filter { !it.isOnSdCard && it.packageName !in linkedSet }
             6 -> allApps.filter { it.isFavorite }
             7 -> allApps.filter { it.isFrozen }
             8 -> allApps.filter { !it.isSystemApp } // تقريبي: قابل للنقل = تطبيق مستخدم عادةً
@@ -553,6 +555,12 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     }
 
     private fun showChooseBackendDialog(app: AppEntry, backends: List<FreezeBackend>) {
+        val auto = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.firstOrNull() ?: return
+        startFreeze(app, auto)
+    }
+
+    @Suppress("unused")
+    private fun showChooseBackendDialogManual(app: AppEntry, backends: List<FreezeBackend>) {
         val labels = backends.map {
             when (it) {
                 FreezeBackend.SHIZUKU -> getString(R.string.freeze_backend_shizuku)
@@ -569,6 +577,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     private fun startFreeze(app: AppEntry, backend: FreezeBackend) {
         pendingFreezeTarget = app
         val wantFrozen = !app.isFrozen
+        Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
         FreezeManager.setFrozen(this, backend, app.packageName, wantFrozen) { result ->
             runOnUiThread { onFreezeResult(app, wantFrozen, result) }
         }

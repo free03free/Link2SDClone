@@ -38,11 +38,6 @@ class SettingsFragment : PreferenceFragmentCompat() {
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         setPreferencesFromResource(R.xml.preferences, rootKey)
 
-        findPreference<Preference>("pref_upgrade_plus")?.setOnPreferenceClickListener {
-            openPlusListing()
-            true
-        }
-
         findPreference<Preference>("pref_install_location")?.setOnPreferenceClickListener {
             val labels = resources.getStringArray(R.array.st2_install_locations)
             val values = arrayOf("auto", "internal", "external")
@@ -167,14 +162,19 @@ class SettingsFragment : PreferenceFragmentCompat() {
         }
 
         // خيارات الربط والإقلاع: تُحفظ الآن وتُنفَّذ حين يكتمل محرك الربط. نخبر المستخدم بصراحة.
-        listOf(
-            "pref_auto_link", "pref_relink_lib_boot", "pref_relink_dex_boot",
-            "pref_bind_dirs_notification", "pref_auto_link_notification", "pref_app2sd_notification"
-        ).forEach { key ->
+        listOf("pref_auto_link", "pref_relink_lib_boot", "pref_relink_dex_boot", "pref_auto_link_notification").forEach { key ->
             findPreference<CheckBoxPreference>(key)?.setOnPreferenceChangeListener { _, v ->
                 if (v == true) toast(R.string.st2_saved_needs_engine)
                 true
             }
+        }
+        findPreference<CheckBoxPreference>("pref_bind_dirs_notification")?.setOnPreferenceChangeListener { _, v ->
+            if (v == true) toast(R.string.fin_saved_only)
+            true
+        }
+        findPreference<CheckBoxPreference>("pref_app2sd_notification")?.setOnPreferenceChangeListener { _, v ->
+            if (v == true) toast(R.string.fin_saved_only)
+            true
         }
         findPreference<CheckBoxPreference>("pref_clear_external_cache")?.setOnPreferenceChangeListener { _, v ->
             if (v == true) toast(R.string.st2_saved_ext_cache)
@@ -194,6 +194,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
 
         findPreference<ListPreference>("pref_appearance")?.setOnPreferenceChangeListener { _, _ ->
             LocaleHelper.applyTheme(requireContext())
+            requireActivity().recreate()
             true
         }
 

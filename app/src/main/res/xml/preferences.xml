@@ -2,12 +2,6 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- Upgrade banner -->
-    <Preference
-        android:key="pref_upgrade_plus"
-        android:title="@string/pref_upgrade_title"
-        android:summary="@string/pref_upgrade_summary" />
-
     <!-- عام -->
     <PreferenceCategory android:title="@string/pref_cat_general">
 
@@ -41,6 +35,12 @@
             android:title="@string/pref_bind_dirs_notification_title"
             android:summary="@string/pref_bind_dirs_notification_summary"
             android:defaultValue="true" />
+
+        <EditTextPreference
+            android:key="pref_manual_sd2_path"
+            android:title="@string/fin2_manual_path_title"
+            android:summary="@string/fin2_manual_path_summary"
+            android:dialogMessage="@string/fin2_manual_path_dialog" />
 
     </PreferenceCategory>
 

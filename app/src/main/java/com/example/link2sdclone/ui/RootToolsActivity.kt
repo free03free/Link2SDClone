@@ -53,14 +53,35 @@ class RootToolsActivity : AppCompatActivity() {
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
         addRow(list, R.string.rt_item_reload) { com.example.link2sdclone.util.ReloadFlag.pending = true; finish() }
-        addRow(list, R.string.rt_item_recreate_scripts) { partitionAction(R.string.rt_item_recreate_scripts) }
-        addRow(list, R.string.rt_item_relink_apps) { partitionAction(R.string.rt_item_relink_apps) }
-        addRow(list, R.string.rt_item_rebind_folders) { partitionAction(R.string.rt_item_rebind_folders) }
-        addRow(list, R.string.rt_item_relink_lib) { partitionAction(R.string.rt_item_relink_lib) }
-        addRow(list, R.string.rt_item_link_dalvik) { partitionAction(R.string.rt_item_link_dalvik) }
-        addRow(list, R.string.rt_item_clean_sd2) { partitionAction(R.string.rt_item_clean_sd2) }
+        addRow(list, R.string.rt_item_recreate_scripts) { createBootScript(R.string.rt_item_recreate_scripts) }
+        addRow(list, R.string.rt_item_relink_apps) { relinkFlow(R.string.rt_item_relink_apps, true, null, null) }
+        addRow(list, R.string.fin3_item_copy_external) { copyExternalAction(R.string.fin3_item_copy_external) }
+        addRow(list, R.string.fin3_item_finalize_external) { finalizeExternalAction(R.string.fin3_item_finalize_external) }
+        addRow(list, R.string.rt_item_relink_lib) { relinkFlow(R.string.rt_item_relink_lib, false, false, true) }
+        addRow(list, R.string.rt_item_link_dalvik) { relinkFlow(R.string.rt_item_link_dalvik, false, true, false) }
+        addRow(list, R.string.rt_item_clean_sd2) { cleanSd2(R.string.rt_item_clean_sd2) }
         addRow(list, R.string.rt_item_clean_dalvik) {
-            requireAccess(true) { showMessage(R.string.rt_dalvik_not_impl, R.string.rt_item_clean_dalvik) }
+            requireAccess(true) {
+                AlertDialog.Builder(this)
+                    .setTitle(R.string.rt_item_clean_dalvik)
+                    .setMessage(R.string.fin2_dalvik_confirm)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
+                        Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
+                        Thread {
+                            val ok = PrivilegedShell.run(Mode.ROOT, "rm -rf /data/dalvik-cache/*", 120_000).ok
+                            runOnUiThread {
+                                if (!isFinishing) {
+                                    showMessage(
+                                        if (ok) R.string.fin2_dalvik_done else R.string.fin2_dalvik_failed,
+                                        R.string.rt_item_clean_dalvik
+                                    )
+                                }
+                            }
+                        }.start()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
         }
         addRow(list, R.string.rt_item_clear_caches) {
             requireAccess(false) { m -> execute(m, "pm trim-caches 999G", R.string.rt_item_clear_caches) }
@@ -146,6 +167,153 @@ class RootToolsActivity : AppCompatActivity() {
                     showMessage(if (found) R.string.rt_sd2_found_not_impl else R.string.sd2_not_found_msg, titleRes)
                 }
             }.start()
+        }
+    }
+
+    // ---- عمليات القسم الثاني (Root): تبدأ بفحص الجاهزية ولا تغيّر شيئًا قبل التأكيد ----
+    private fun withReady(block: (String) -> Unit) {
+        val appCtx = applicationContext
+        Thread {
+            val ready = com.example.link2sdclone.util.LinkEngine.check(appCtx)
+            runOnUiThread {
+                if (isFinishing) return@runOnUiThread
+                val mp = ready.mountPoint
+                if (!ready.ok || mp == null) showText(ready.message) else block(mp)
+            }
+        }.start()
+    }
+
+    private fun showText(msg: String, titleRes: Int? = null) {
+        val b = AlertDialog.Builder(this)
+            .setMessage(msg)
+            .setPositiveButton(android.R.string.ok, null)
+        if (titleRes != null) b.setTitle(titleRes)
+        b.show()
+    }
+
+    private fun relinkFlow(titleRes: Int, apk: Boolean, dex: Boolean?, lib: Boolean?) {
+        withReady { mp ->
+            AlertDialog.Builder(this)
+                .setTitle(titleRes)
+                .setMessage(R.string.fin_confirm_relink)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
+                    val appCtx = applicationContext
+                    Thread {
+                        val text = com.example.link2sdclone.util.LinkBatch.relinkAll(appCtx, mp, apk, dex, lib)
+                        runOnUiThread {
+                            if (isFinishing) return@runOnUiThread
+                            com.example.link2sdclone.util.ReloadFlag.pending = true
+                            showText(text, titleRes)
+                        }
+                    }.start()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun createBootScript(titleRes: Int) {
+        withReady { mp ->
+            val appCtx = applicationContext
+            Thread {
+                val plan = com.example.link2sdclone.util.LinkBatch.planBootScript(appCtx, mp)
+                runOnUiThread {
+                    if (isFinishing) return@runOnUiThread
+                    if (!plan.ok) {
+                        showText(plan.message, titleRes)
+                    } else {
+                        AlertDialog.Builder(this)
+                            .setTitle(titleRes)
+                            .setMessage(plan.message)
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
+                                Thread {
+                                    val ok = com.example.link2sdclone.util.LinkBatch.writeBootScript(plan)
+                                    runOnUiThread {
+                                        if (!isFinishing) {
+                                            showText(
+                                                if (ok) getString(R.string.fin_script_done, plan.path)
+                                                else getString(R.string.fin_script_failed),
+                                                titleRes
+                                            )
+                                        }
+                                    }
+                                }.start()
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                    }
+                }
+            }.start()
+        }
+    }
+
+    private fun cleanSd2(titleRes: Int) {
+        withReady { mp ->
+            val appCtx = applicationContext
+            Thread {
+                val orphans = com.example.link2sdclone.util.LinkBatch.findOrphans(appCtx, mp)
+                runOnUiThread {
+                    if (isFinishing) return@runOnUiThread
+                    if (orphans == null) {
+                        showText(getString(R.string.fin_clean_failed), titleRes)
+                    } else if (orphans.isEmpty()) {
+                        showText(getString(R.string.fin_clean_none), titleRes)
+                    } else {
+                        val shown = orphans.take(15).joinToString("\n") { "• " + it } +
+                            (if (orphans.size > 15) "\n..." else "")
+                        AlertDialog.Builder(this)
+                            .setTitle(titleRes)
+                            .setMessage(getString(R.string.fin_clean_confirm, orphans.size, mp, shown))
+                            .setPositiveButton(android.R.string.ok) { _, _ ->
+                                Thread {
+                                    val n = com.example.link2sdclone.util.LinkBatch.deleteOrphans(mp, orphans)
+                                    runOnUiThread {
+                                        if (!isFinishing) showText(getString(R.string.fin_clean_done, n), titleRes)
+                                    }
+                                }.start()
+                            }
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .show()
+                    }
+                }
+            }.start()
+        }
+    }
+
+        private fun copyExternalAction(titleRes: Int) {
+        withReady { mp ->
+            AlertDialog.Builder(this)
+                .setTitle(titleRes)
+                .setMessage(R.string.fin3_copy_confirm)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
+                    val appCtx = applicationContext
+                    Thread {
+                        val text = com.example.link2sdclone.util.LinkBatch.copyAllExternal(appCtx, mp)
+                        runOnUiThread { if (!isFinishing) showText(text, titleRes) }
+                    }.start()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
+        }
+    }
+
+    private fun finalizeExternalAction(titleRes: Int) {
+        withReady { mp ->
+            AlertDialog.Builder(this)
+                .setTitle(titleRes)
+                .setMessage(R.string.fin3_finalize_confirm)
+                .setPositiveButton(android.R.string.ok) { _, _ ->
+                    Toast.makeText(this, R.string.rt_running, Toast.LENGTH_SHORT).show()
+                    val appCtx = applicationContext
+                    Thread {
+                        val text = com.example.link2sdclone.util.LinkBatch.finalizeAllExternal(appCtx, mp)
+                        runOnUiThread { if (!isFinishing) showText(text, titleRes) }
+                    }.start()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
         }
     }
 

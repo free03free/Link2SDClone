@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fin_confirm_relink">سيتم فحص التطبيقات التي رُبطت سابقًا عبر هذا التطبيق وإعادة ربط ما فقد ربطه (مثل التطبيقات التي تحدّثت). كل ملف يُنسخ ويُتحقق منه ويُتراجع عند الفشل. متابعة؟</string>
+    <string name="fin_no_linked">لا توجد تطبيقات مربوطة عبر هذا التطبيق.</string>
+    <string name="fin_relink_result">أُعيد ربط %1$d تطبيق، وتُخطّي %2$d (مربوط أصلًا أو غير مثبّت).</string>
+    <string name="fin_rebind_not_impl">ربط المجلدات الخارجية (mount --bind لمجلدات Android/data وobb) لم يُنفَّذ في هذه النسخة، لأن الخطأ فيه قد يفقدك بيانات. الخيار ظاهر ولا يفعل شيئًا.</string>
+    <string name="fin_script_no_magisk">لم أجد Magisk أو KernelSU (المجلد /data/adb)، فلا أعرف أين أضع سكربت الإقلاع في جهازك. ركّب القسم يدويًا أو بسكربت init.d خاص بجهازك.</string>
+    <string name="fin_script_bad_dev">اسم قسم البطاقة (%1$s) غير ثابت بين مرات التشغيل، فلن أكتب له سكربت إقلاع.</string>
+    <string name="fin_script_confirm">سيُكتب السكربت %1$s ليركّب %2$s على %3$s عند كل إقلاع. إن حدث خلل في الإقلاع فاحذف الملف من وضع الاسترداد (Recovery) أو الوضع الآمن في Magisk.\n\nلم يُجرَّب على جهازك. متابعة؟</string>
+    <string name="fin_script_done">تمت كتابة سكربت الإقلاع: %1$s</string>
+    <string name="fin_script_failed">فشلت كتابة سكربت الإقلاع.</string>
+    <string name="fin_clean_none">لا توجد بقايا في القسم الثاني.</string>
+    <string name="fin_clean_failed">تعذّر قراءة قائمة التطبيقات المثبتة، فلم أحذف شيئًا.</string>
+    <string name="fin_clean_confirm">وُجد %1$d مجلد لتطبيقات غير مثبتة في %2$s:\n%3$s\n\nحذفها نهائيًا؟</string>
+    <string name="fin_clean_done">تم حذف %1$d مجلد.</string>
+    <string name="fin_saved_only">تم حفظ الخيار فقط. العملية المرتبطة به لم تُنفَّذ في هذه النسخة.</string>
+    <string name="fin_boot_channel">إعادة الربط عند الإقلاع</string>
+    <string name="fin_boot_title">إعادة الربط</string>
+    <string name="fin_boot_text">اكتملت إعادة ربط التطبيقات بعد الإقلاع.</string>
+</resources>

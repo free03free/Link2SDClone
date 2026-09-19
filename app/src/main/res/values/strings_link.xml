@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="lk_need_root">الربط الحقيقي يحتاج Root، ولم يُعثر عليه في هذا الجهاز. Shizuku وIsland لا يستطيعان الكتابة في /data/app.</string>
+    <string name="lk_no_partition">لم أجد قسمًا ثانيًا من نوع ext مركّبًا (مثل /data/sdext2). أنشئ قسم ext4 على البطاقة وركّبه ثم أعد المحاولة.</string>
+    <string name="lk_not_writable">لا يمكن الكتابة في القسم الثاني (%1$s). تأكد أنه مركّب للقراءة والكتابة.</string>
+    <string name="lk_bad_path">مسار غير آمن للتطبيق %1$s، تم التجاوز.</string>
+    <string name="lk_not_data_app">التطبيق %1$s ليس في /data/app، فلا يمكن ربطه.</string>
+    <string name="lk_no_space">لا توجد مساحة كافية في القسم الثاني لربط %1$s.</string>
+    <string name="lk_already">لا شيء لربطه في %1$s (مربوط من قبل أو لا ملفات).</string>
+    <string name="lk_not_linked">%1$s غير مربوط.</string>
+    <string name="lk_item_failed">فشل ربط %2$s للتطبيق %1$s (رمز %3$d). أُعيد كل شيء كما كان.</string>
+    <string name="lk_none_eligible">لا يمكن ربط تطبيقات النظام ولا هذا التطبيق نفسه. اختر تطبيقات مستخدم عادية.</string>
+    <string name="lk_confirm_link">سيتم ربط %1$d تطبيق: تُنسخ ملفات APK (وlib وdex إن فعّلتها في الإعدادات) إلى %2$s، ويُتحقق من كل ملف قبل استبداله برابط رمزي، ويُتراجع تلقائيًا عند أي فشل.\n\nتنبيه: بعد إعادة التشغيل يجب أن يكون القسم مركّبًا قبل أن يفحص النظام التطبيقات (سكربت إقلاع)، وإلا قد يختفي التطبيق. جرّب أولًا على تطبيق غير مهم. لا تُغلق التطبيق أثناء التنفيذ.</string>
+    <string name="lk_confirm_unlink">سيتم إرجاع ملفات %1$d تطبيق من %2$s إلى الذاكرة الداخلية بعد التحقق من كل ملف. متابعة؟</string>
+    <string name="lk_selinux_warn">SELinux في وضع Enforcing، وقد يرفض النظام قراءة الملفات المربوطة.</string>
+</resources>

@@ -110,7 +110,8 @@ object BatchActions {
 
     fun execute(activity: Activity, index: Int, apps: List<AppEntry>, onDone: () -> Unit) {
         when (index) {
-            0, 1 -> info(activity, R.string.st3_link_not_impl)
+            0 -> linkAction(activity, apps, true, onDone)
+            1 -> linkAction(activity, apps, false, onDone)
             2 -> move(activity, apps, true, onDone)
             3 -> move(activity, apps, false, onDone)
             6 -> reinstall(activity, apps, onDone)
@@ -317,6 +318,55 @@ object BatchActions {
                     .show()
             }
         }
+    }
+
+    // ---- الربط وإزالته (Root فقط، مع فحص جاهزية وتأكيد صريح) ----
+    private fun linkAction(activity: Activity, apps: List<AppEntry>, link: Boolean, onDone: () -> Unit) {
+        val list = others(activity, apps).filter { !it.isSystemApp }
+        if (list.isEmpty()) {
+            infoText(activity, activity.getString(R.string.lk_none_eligible))
+            return
+        }
+        val appCtx = activity.applicationContext
+        Thread {
+            val ready = com.example.link2sdclone.util.LinkEngine.check(appCtx)
+            activity.runOnUiThread {
+                if (activity.isFinishing) return@runOnUiThread
+                val mp = ready.mountPoint
+                if (!ready.ok || mp == null) {
+                    infoText(activity, ready.message)
+                    return@runOnUiThread
+                }
+                var msg = activity.getString(
+                    if (link) R.string.lk_confirm_link else R.string.lk_confirm_unlink, list.size, mp)
+                if (link && ready.selinuxEnforcing) msg += "\n\n" + activity.getString(R.string.lk_selinux_warn)
+                AlertDialog.Builder(activity)
+                    .setMessage(msg)
+                    .setPositiveButton(android.R.string.ok) { _, _ -> runLink(activity, list, link, mp, onDone) }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
+            }
+        }.start()
+    }
+
+    private fun runLink(activity: Activity, list: List<AppEntry>, link: Boolean, mp: String, onDone: () -> Unit) {
+        Toast.makeText(activity, R.string.rt_running, Toast.LENGTH_SHORT).show()
+        val appCtx = activity.applicationContext
+        Thread {
+            var ok = 0
+            val fails = StringBuilder()
+            list.forEach { a ->
+                val r = if (link) com.example.link2sdclone.util.LinkEngine.link(appCtx, a.packageName, a.apkPath, mp)
+                else com.example.link2sdclone.util.LinkEngine.unlink(appCtx, a.packageName, a.apkPath, mp)
+                if (r.ok) ok++ else fails.append("• ").append(a.label).append(": ").append(r.message).append("\n")
+            }
+            activity.runOnUiThread {
+                if (activity.isFinishing) return@runOnUiThread
+                val head = activity.getString(R.string.st3_batch_result, ok, list.size)
+                infoText(activity, if (fails.isEmpty()) head else head + "\n\n" + fails.toString().trim())
+                onDone()
+            }
+        }.start()
     }
 
     private fun share(activity: Activity, apps: List<AppEntry>, onDone: () -> Unit) {

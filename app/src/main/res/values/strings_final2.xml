@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fin2_dalvik_confirm">سيُحذف /data/dalvik-cache بالكامل. يعيد النظام إنشاءه تلقائيًا عند الحاجة، لكن قد يبطئ فتح التطبيقات مؤقتًا بعد ذلك، وقد يسبب اضطرابًا إن نُفِّذ أثناء عمل تطبيقات ثقيلة. يُفضَّل إعادة التشغيل بعد التنفيذ. متابعة؟</string>
+    <string name="fin2_dalvik_done">تم حذف dalvik-cache. يُنصح بإعادة تشغيل الجهاز الآن.</string>
+    <string name="fin2_dalvik_failed">فشل حذف dalvik-cache.</string>
+    <string name="fin2_manual_path_title">مسار القسم الثاني يدويًا</string>
+    <string name="fin2_manual_path_summary">اتركه فارغًا للاكتشاف التلقائي. عبّئه فقط إن لم يُكتشف القسم تلقائيًا (مثال: /data/sdext2).</string>
+    <string name="fin2_manual_path_dialog">أدخل المسار الكامل لنقطة تركيب القسم الثاني. يجب أن يكون موجودًا وقابلًا للكتابة.</string>
+    <string name="fin2_manual_path_missing">المسار اليدوي المحدَّد في الإعدادات (%1$s) غير موجود. تحقق منه أو أفرغ الحقل للعودة للاكتشاف التلقائي.</string>
+</resources>

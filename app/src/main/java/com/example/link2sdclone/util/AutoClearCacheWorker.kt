@@ -29,9 +29,28 @@ class AutoClearCacheWorker(ctx: Context, params: WorkerParameters) : Worker(ctx,
         }
 
         val path = Environment.getDataDirectory().path
+        val excluded = ctx.getSharedPreferences("cache_exclude_prefs", Context.MODE_PRIVATE)
+            .getStringSet("excluded_packages", emptySet<String>()) ?: emptySet<String>()
+        val clearExt = sp.getBoolean("pref_clear_external_cache", false)
         val before = StatFs(path).availableBytes
-        val r = PrivilegedShell.run(mode, "pm trim-caches 999G", 120_000)
-        if (!r.ok) return Result.success()
+        val ok: Boolean = if (mode == PrivilegedShell.Mode.ROOT) {
+            val pkgs = ctx.packageManager.getInstalledApplications(0)
+                .map { it.packageName }
+                .filter { it != ctx.packageName && it !in excluded && Regex("[A-Za-z0-9_.]+").matches(it) }
+            if (pkgs.isEmpty()) {
+                true
+            } else {
+                val ext = if (clearExt) " /data/media/0/Android/data/\$p/cache/*" else ""
+                val cmd = "for p in " + pkgs.joinToString(" ") +
+                    "; do rm -rf /data/data/\$p/cache/* /data/data/\$p/code_cache/*" + ext + "; done; true"
+                PrivilegedShell.run(mode, cmd, 300_000).ok
+            }
+        } else if (excluded.isEmpty()) {
+            PrivilegedShell.run(mode, "pm trim-caches 999G", 120_000).ok
+        } else {
+            false
+        }
+        if (!ok) return Result.success()
         val freed = StatFs(path).availableBytes - before
 
         val minMb = sp.getInt("clear_cache_notif_size_mb", 5)

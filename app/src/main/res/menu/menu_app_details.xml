@@ -19,4 +19,40 @@
         android:id="@+id/details_play"
         android:title="@string/appinfo_play"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/details_reinstall"
+        android:title="@string/ctx_reinstall"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_delete"
+        android:title="@string/ctx_delete"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_freeze"
+        android:title="@string/ctx_freeze"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_convert_system"
+        android:title="@string/ctx_convert_system"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_clear_data"
+        android:title="@string/ctx_clear_data"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_clear_cache"
+        android:title="@string/ctx_clear_cache"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_share"
+        android:title="@string/ctx_share"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_share_apk"
+        android:title="@string/ctx_share_apk"
+        app:showAsAction="never" />
+    <item
+        android:id="@+id/details_create_shortcut"
+        android:title="@string/ctx_create_shortcut"
+        app:showAsAction="never" />
 </menu>

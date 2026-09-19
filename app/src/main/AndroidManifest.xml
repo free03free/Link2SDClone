@@ -19,11 +19,12 @@
         </intent>
     </queries>
 
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:name=".Link2SDApp"
         android:allowBackup="true"
-        android:icon="@drawable/ic_sd_card"
-        android:roundIcon="@drawable/ic_sd_card"
+        android:icon="@drawable/ic_freelinksd"
+        android:roundIcon="@drawable/ic_freelinksd"
         android:label="@string/app_name"
         android:theme="@style/AppTheme"
         android:supportsRtl="true">
@@ -109,5 +110,12 @@
         <activity
             android:name="com.example.link2sdclone.ui.RootToolsActivity"
             android:exported="false" />
+    <receiver
+            android:name="com.example.link2sdclone.util.BootReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
     </application>
 </manifest>

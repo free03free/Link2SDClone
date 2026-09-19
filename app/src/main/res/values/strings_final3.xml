@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="fin3_item_copy_external">نسخ المجلدات الخارجية</string>
+    <string name="fin3_item_finalize_external">حذف الملفات الأصلية بعد النسخ</string>
+    <string name="fin3_copy_confirm">تحذير: غير مُجرَّب على أي جهاز حتى الآن.\n\nينسخ (بلا حذف) مجلدات Android/data وAndroid/obb للتطبيقات المربوطة مسبقًا إلى القسم الثاني. لا يمس الملفات الأصلية إطلاقًا، ويمكن تكراره بأمان. متابعة؟</string>
+    <string name="fin3_finalize_confirm">تحذير: هذه الخطوة تحذف الملفات الأصلية نهائيًا بعد التحقق من مطابقتها للنسخة، ثم تربط النسخة مكانها. لا تنفّذها إلا بعد أن تتأكد يدويًا (بالمقارنة أو بفتح التطبيق) أن النسخ نجح في الخطوة السابقة.\n\nمهم: الربط لا يصمد بعد إعادة تشغيل الجهاز حاليًا. جرّبه أولًا على تطبيق غير مهمّ. متابعة؟</string>
+    <string name="fin3_nothing_to_copy">%1$s: لا توجد مجلدات خارجية لنسخها.</string>
+    <string name="fin3_nothing_to_finalize">%1$s لم يُنسخ مسبقًا، أو لا يوجد ما يُنقل.</string>
+    <string name="fin3_no_copied">لا توجد تطبيقات نُسخت مسبقًا. استخدم "نسخ المجلدات الخارجية" أولًا.</string>
+    <string name="fin3_copy_outdated">نسخة %1$s (%2$s) لا تطابق الأصل حاليًا. أعد "نسخ المجلدات الخارجية" أولًا قبل الحذف.</string>
+</resources>
