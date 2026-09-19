@@ -155,7 +155,19 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             }
         }
 
+        lifecycle.addObserver(resumeObserver)
         loadInstalledApps()
+    }
+
+    // إعادة تحميل القائمة عند طلبها (أدوات الروت / بعد الحذف)، وفحص Root لإتاحته وسيطًا للتجميد.
+    private val resumeObserver = object : androidx.lifecycle.LifecycleEventObserver {
+        override fun onStateChanged(source: androidx.lifecycle.LifecycleOwner, event: androidx.lifecycle.Lifecycle.Event) {
+            if (event != androidx.lifecycle.Lifecycle.Event.ON_RESUME) return
+            if (com.example.link2sdclone.util.ReloadFlag.consume()) loadInstalledApps()
+            if (com.example.link2sdclone.util.PrivilegedShell.rootKnown != true) {
+                com.example.link2sdclone.util.PrivilegedShell.warmUp()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -375,7 +387,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 batchSetFrozen(false)
             } else {
                 val targets = allApps.filter { it.packageName in selectedPackages }
-                com.example.link2sdclone.ui.BatchActions.execute(this, index, targets) { exitSelectionMode() }
+                com.example.link2sdclone.ui.BatchActions.execute(this, index, targets) { exitSelectionMode(); loadInstalledApps() }
             }
         }
     }
@@ -424,7 +436,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
     private fun onContextAction(app: AppEntry, actionId: Int) {
         when (actionId) {
             R.id.ctx_move_sd -> {
-                com.example.link2sdclone.ui.BatchActions.execute(this, 2, listOf(app)) { }
+                com.example.link2sdclone.ui.BatchActions.execute(this, 2, listOf(app)) { loadInstalledApps() }
             }
             R.id.ctx_run -> {
                 val launchIntent = packageManager.getLaunchIntentForPackage(app.packageName)
@@ -545,6 +557,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             when (it) {
                 FreezeBackend.SHIZUKU -> getString(R.string.freeze_backend_shizuku)
                 FreezeBackend.ISLAND -> getString(R.string.freeze_backend_island)
+                FreezeBackend.ROOT -> getString(R.string.freeze_backend_root)
             }
         }.toTypedArray()
         AlertDialog.Builder(this)

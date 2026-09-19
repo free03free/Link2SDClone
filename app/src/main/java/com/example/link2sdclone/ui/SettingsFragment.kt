@@ -186,6 +186,7 @@ class SettingsFragment : PreferenceFragmentCompat() {
             FreezeManager.preferredBackend = when (newValue as String) {
                 "shizuku" -> FreezeBackend.SHIZUKU
                 "island" -> FreezeBackend.ISLAND
+                "root" -> FreezeBackend.ROOT
                 else -> null
             }
             true

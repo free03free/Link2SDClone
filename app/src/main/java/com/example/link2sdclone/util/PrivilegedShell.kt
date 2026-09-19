@@ -40,11 +40,25 @@ object PrivilegedShell {
         }
     }
 
-    private fun rootAvailable(): Boolean = try {
-        val p = ProcessBuilder("su", "-c", "id").redirectErrorStream(true).start()
-        collect(p, 10_000).output.contains("uid=0")
-    } catch (e: Exception) {
-        false
+    /** null = لم يُفحص بعد. يُحدَّث من rootAvailable، ويُقرأ من الخيط الرئيسي دون حجب. */
+    @Volatile
+    var rootKnown: Boolean? = null
+        private set
+
+    private fun rootAvailable(): Boolean {
+        val ok = try {
+            val p = ProcessBuilder("su", "-c", "id").redirectErrorStream(true).start()
+            collect(p, 10_000).output.contains("uid=0")
+        } catch (e: Exception) {
+            false
+        }
+        rootKnown = ok
+        return ok
+    }
+
+    /** يفحص Root في خيط خلفي ويحفظ النتيجة. */
+    fun warmUp() {
+        Thread { rootAvailable() }.start()
     }
 
     // Shizuku.newProcess صار private في الإصدار 13، فنستدعيه بالانعكاس.

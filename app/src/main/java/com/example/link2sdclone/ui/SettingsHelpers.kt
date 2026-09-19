@@ -12,6 +12,7 @@ fun applySavedFreezeBackend(context: Context) {
     FreezeManager.preferredBackend = when (v) {
         "shizuku" -> FreezeBackend.SHIZUKU
         "island" -> FreezeBackend.ISLAND
+        "root" -> FreezeBackend.ROOT
         else -> null
     }
 }

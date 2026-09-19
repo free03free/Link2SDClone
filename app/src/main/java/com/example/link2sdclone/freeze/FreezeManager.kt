@@ -2,6 +2,7 @@ package com.example.link2sdclone.freeze
 
 import android.app.Activity
 import android.content.Context
+import com.example.link2sdclone.util.PrivilegedShell
 
 /**
  * Single entry point MainActivity calls into. Picks whichever backend the
@@ -37,6 +38,7 @@ object FreezeManager {
     private var shizukuPermissionListener: Any? = null
 
     fun availableBackends(context: Context): List<FreezeBackend> = buildList {
+        if (PrivilegedShell.rootKnown == true) add(FreezeBackend.ROOT)
         if (ShizukuFreezeBackend.isInstalled(context) && ShizukuFreezeBackend.isServiceRunning()) add(FreezeBackend.SHIZUKU)
         if (IslandFreezeBackend.isInstalled(context)) add(FreezeBackend.ISLAND)
     }
@@ -56,6 +58,8 @@ object FreezeManager {
         onFinalResult: (FreezeResult) -> Unit
     ) {
         when (backend) {
+            FreezeBackend.ROOT -> performRootFreezeAsync(activity, packageName, freeze, onFinalResult)
+
             FreezeBackend.SHIZUKU -> {
                 if (!ShizukuFreezeBackend.isInstalled(activity) || !ShizukuFreezeBackend.isServiceRunning()) {
                     onFinalResult(FreezeResult.BackendNotAvailable); return
@@ -136,6 +140,34 @@ object FreezeManager {
         val expectedEnabled = !freeze
         return if (nowEnabled == expectedEnabled) FreezeResult.Success
         else FreezeResult.Failed("shizuku_verify_failed")
+    }
+
+    // Root: أوامر pm عبر su، في خيط واحد متسلسل كي لا تتزاحم عمليات su في التجميد الجماعي.
+    private val rootExecutor = java.util.concurrent.Executors.newSingleThreadExecutor()
+
+    private fun performRootFreezeAsync(
+        context: Context, packageName: String, freeze: Boolean, onFinalResult: (FreezeResult) -> Unit
+    ) {
+        val app = context.applicationContext
+        rootExecutor.execute { onFinalResult(performRootFreeze(app, packageName, freeze)) }
+    }
+
+    private fun performRootFreeze(context: Context, packageName: String, freeze: Boolean): FreezeResult {
+        if (packageName == context.packageName) return FreezeResult.Failed("root_self_package")
+        if (!Regex("[A-Za-z0-9_.]+").matches(packageName)) return FreezeResult.Failed("root_bad_package")
+        val cmd = if (freeze) "pm disable-user --user 0 $packageName" else "pm enable --user 0 $packageName"
+        val r = PrivilegedShell.run(PrivilegedShell.Mode.ROOT, cmd)
+        if (!r.ok) return FreezeResult.Failed("root_call_failed: " + r.output.take(100))
+        // نتحقق من الحالة الحقيقية في النظام، لا من نجاح الأمر فقط.
+        val state = try {
+            context.packageManager.getApplicationEnabledSetting(packageName)
+        } catch (e: Exception) {
+            return FreezeResult.Failed("root_verify_failed")
+        }
+        val frozenNow = state == android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED ||
+            state == android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_USER ||
+            state == android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED_UNTIL_USED
+        return if (frozenNow == freeze) FreezeResult.Success else FreezeResult.Failed("root_verify_failed")
     }
 
     // ---- Activity lifecycle plumbing ----

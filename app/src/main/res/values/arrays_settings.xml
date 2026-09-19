@@ -30,10 +30,12 @@
         <item>تلقائي (حسب المتاح)</item>
         <item>Shizuku</item>
         <item>Island</item>
+        <item>Root</item>
     </string-array>
     <string-array name="freeze_backend_values">
         <item>auto</item>
         <item>shizuku</item>
         <item>island</item>
+        <item>root</item>
     </string-array>
 </resources>

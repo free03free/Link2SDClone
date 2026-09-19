@@ -52,7 +52,7 @@ class RootToolsActivity : AppCompatActivity() {
 
         val list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
 
-        addRow(list, R.string.rt_item_reload) { finish() }
+        addRow(list, R.string.rt_item_reload) { com.example.link2sdclone.util.ReloadFlag.pending = true; finish() }
         addRow(list, R.string.rt_item_recreate_scripts) { partitionAction(R.string.rt_item_recreate_scripts) }
         addRow(list, R.string.rt_item_relink_apps) { partitionAction(R.string.rt_item_relink_apps) }
         addRow(list, R.string.rt_item_rebind_folders) { partitionAction(R.string.rt_item_rebind_folders) }

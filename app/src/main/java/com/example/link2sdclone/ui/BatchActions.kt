@@ -123,7 +123,7 @@ object BatchActions {
 
     // ---- طابور نوافذ النظام (حذف / إعادة تثبيت): واحدة بعد الأخرى ----
     fun nextInQueue(activity: Activity) {
-        val i = queue.poll() ?: return
+        val i = queue.poll() ?: run { com.example.link2sdclone.util.ReloadFlag.pending = true; return }
         try {
             activity.startActivityForResult(i, REQ_QUEUE)
         } catch (e: Exception) {

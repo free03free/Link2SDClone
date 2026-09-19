@@ -6,6 +6,7 @@ package com.example.link2sdclone.freeze
  * directly via `su`.
  */
 enum class FreezeBackend {
+    ROOT,
     SHIZUKU,
     ISLAND
 }
