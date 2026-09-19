@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.CheckBox
+import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
@@ -39,11 +40,9 @@ class GroupAppsActivity : AppCompatActivity() {
         }
 
         val pm = packageManager
-        // MATCH_DISABLED_COMPONENTS is required here so apps the user has
-        // frozen (disabled at the system level) still show up in this list --
-        // without it, PackageManager silently drops disabled apps, which made
-        // apps the user had just selected/frozen for a group vanish entirely
-        // the next time this screen opened.
+        // MATCH_DISABLED_COMPONENTS مطلوب هنا -- بدونه، PackageManager بيسقط
+        // التطبيقات المجمدة من القائمة بصمت، فتختفي التطبيقات اللي جمدتها
+        // للتو في نفس المجموعة.
         allInstalledApps = pm.getInstalledApplications(
             PackageManager.GET_META_DATA or PackageManager.MATCH_DISABLED_COMPONENTS
         ).sortedBy { pm.getApplicationLabel(it).toString().lowercase() }
@@ -63,17 +62,13 @@ class GroupAppsActivity : AppCompatActivity() {
         findViewById<Button>(R.id.btn_unfreeze_group).setOnClickListener { applyToGroup(freeze = false) }
     }
 
-    // Same reason as GroupsActivity: without this, Island's result for
-    // applyToGroup() is dropped and the batch never completes.
+    // نفس السبب الموجود في GroupsActivity: بدونها رد Island يضيع والعملية
+    // الجماعية ما بتكملش.
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         FreezeManager.onActivityResult(requestCode, resultCode)
     }
 
-    /** Only the filter categories that make sense from raw ApplicationInfo
-     *  (no root, no favorites/recent-update tracking on this screen) --
-     *  anything else falls back to "All" with a short explanation, same
-     *  honest-degradation pattern used elsewhere in this project. */
     private fun applyFilter() {
         val filtered = when (currentFilterIndex) {
             1 -> allInstalledApps.filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) != 0 }
@@ -81,9 +76,7 @@ class GroupAppsActivity : AppCompatActivity() {
             4 -> allInstalledApps.filter { it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/") }
             5 -> allInstalledApps.filter { !(it.sourceDir.contains("/mnt/") || it.sourceDir.contains("/storage/")) }
             7 -> allInstalledApps.filter { !it.enabled }
-            // Group-scoped: only apps that belong to THIS group's own
-            // package set (selected) and are currently frozen -- unlike
-            // index 7 above, this ignores every other app on the device.
+            // خاص بهذه الشاشة فقط: التطبيقات المجمدة داخل هذه المجموعة تحديداً
             11 -> allInstalledApps.filter { it.packageName in selected && !it.enabled }
             0 -> allInstalledApps
             else -> {
@@ -98,6 +91,8 @@ class GroupAppsActivity : AppCompatActivity() {
         }
     }
 
+    /** يشترك فيه زرّا "تجميد المحدد"/"إلغاء تجميد المحدد" هنا وسويتش
+     *  المجموعة في GroupsActivity عبر GroupFreezeHelper -- مسار واحد فقط. */
     private fun applyToGroup(freeze: Boolean) {
         val packages = GroupsManager.getPackages(this, groupName)
         GroupFreezeHelper.apply(this, packages, freeze) { }
@@ -112,6 +107,7 @@ class GroupAppsActivity : AppCompatActivity() {
             val icon: ImageView = view.findViewById(R.id.exclude_icon)
             val label: TextView = view.findViewById(R.id.exclude_label)
             val checkbox: CheckBox = view.findViewById(R.id.exclude_checkbox)
+            val remove: ImageButton = view.findViewById(R.id.exclude_remove_from_group)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
@@ -124,10 +120,20 @@ class GroupAppsActivity : AppCompatActivity() {
             val pm = packageManager
             holder.label.text = pm.getApplicationLabel(info)
             holder.icon.setImageDrawable(try { pm.getApplicationIcon(info) } catch (e: Exception) { null })
-            holder.checkbox.isChecked = selected.contains(info.packageName)
+
+            val isInGroup = selected.contains(info.packageName)
+            holder.checkbox.isChecked = isInGroup
+            holder.remove.visibility = if (isInGroup) View.VISIBLE else View.GONE
+
             holder.itemView.setOnClickListener {
                 holder.checkbox.isChecked = !holder.checkbox.isChecked
+                holder.remove.visibility = if (holder.checkbox.isChecked) View.VISIBLE else View.GONE
                 onToggle(info.packageName, holder.checkbox.isChecked)
+            }
+            holder.remove.setOnClickListener {
+                holder.checkbox.isChecked = false
+                holder.remove.visibility = View.GONE
+                onToggle(info.packageName, false)
             }
         }
 

@@ -43,7 +43,11 @@
     <string name="internal_storage">الذاكرة الداخلية</string>
     <string name="sd_storage">بطاقة SD</string>
     <string name="second_partition">Partition الثاني (SD-Ext)</string>
-    <string name="app_detail_format">الاسم: %1$s\nالحزمة: %2$s\nالإصدار: %3$s\nحجم APK: %4$d MB\nحجم البيانات: %5$d MB</string>
+    <string name="app_detail_format">الاسم: %1$s
+الحزمة: %2$s
+الإصدار: %3$s
+حجم APK: %4$d MB
+حجم البيانات: %5$d MB</string>
 
     <!-- الإعدادات -->
     <string name="pref_category_linking">إعدادات الربط</string>
@@ -70,4 +74,18 @@
     <string name="pref_version_title">الإصدار</string>
 
     <string name="group_action_partial_failure">تم تجميد بعض التطبيقات فقط</string>
-    <string name="group_action_frozen_done">تم تجميد تطبيقات المجموعة</string>\n    <string name="group_action_unfrozen_done">تم إلغاء تجميد تطبيقات المجموعة</string>\n</resources>
+    <string name="group_action_frozen_done">تم تجميد تطبيقات المجموعة</string>
+    <string name="group_action_unfrozen_done">تم إلغاء تجميد تطبيقات المجموعة</string>
+    <string name="group_pin_desc">تثبيت/إلغاء تثبيت المجموعة</string>
+    <string name="group_rename">إعادة تسمية المجموعة</string>
+    <string name="group_rename_confirm">حفظ</string>
+    <string name="group_name_taken">يوجد مجموعة بهذا الاسم بالفعل</string>
+    <string name="group_sort_button">ترتيب حسب</string>
+    <string name="group_sort_title">ترتيب المجموعات</string>
+    <string name="group_sort_name">الاسم</string>
+    <string name="group_sort_created">تاريخ الإنشاء</string>
+    <string name="group_sort_modified">تاريخ آخر تعديل</string>
+    <string name="group_sort_count">عدد التطبيقات</string>
+    <string name="group_frozen_count_format">%1$d من %2$d مجمد</string>
+    <string name="group_remove_from_group">إزالة من المجموعة</string>
+</resources>

@@ -23,6 +23,18 @@
         android:layout_marginStart="12dp"
         android:textSize="15sp" />
 
+    <!-- مخفي افتراضياً: يُظهره فقط GroupAppsActivity، فلا يتأثر أي استخدام
+         آخر لهذا التخطيط المشترك في شاشات أخرى بالتطبيق. -->
+    <ImageButton
+        android:id="@+id/exclude_remove_from_group"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_marginEnd="4dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:contentDescription="@string/group_remove_from_group"
+        android:visibility="gone" />
+
     <CheckBox
         android:id="@+id/exclude_checkbox"
         android:layout_width="wrap_content"

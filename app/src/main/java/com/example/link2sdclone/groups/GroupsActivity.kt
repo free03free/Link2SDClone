@@ -4,18 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.SwitchCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.link2sdclone.R
 import com.example.link2sdclone.freeze.FreezeManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import androidx.appcompat.widget.SwitchCompat
 
 class GroupsActivity : AppCompatActivity() {
 
@@ -27,10 +28,7 @@ class GroupsActivity : AppCompatActivity() {
         setContentView(R.layout.activity_groups)
 
         findViewById<androidx.appcompat.widget.Toolbar>(R.id.toolbar_groups)
-            .apply {
-                subtitle = "build: switch-v2"
-                setNavigationOnClickListener { finish() }
-            }
+            .setNavigationOnClickListener { finish() }
 
         recyclerView = findViewById(R.id.groups_list)
         emptyView = findViewById(R.id.groups_empty)
@@ -38,6 +36,10 @@ class GroupsActivity : AppCompatActivity() {
 
         findViewById<FloatingActionButton>(R.id.fab_add_group).setOnClickListener {
             showCreateGroupDialog()
+        }
+
+        findViewById<Button>(R.id.btn_sort_groups).setOnClickListener {
+            showSortDialog()
         }
 
         refreshList()
@@ -48,10 +50,8 @@ class GroupsActivity : AppCompatActivity() {
         refreshList()
     }
 
-    // Required so Island's freeze/unfreeze result actually reaches
-    // FreezeManager -- without this override, Android drops the result
-    // silently and toggleGroupFreeze() never completes (no Toast, no
-    // guarantee the freeze even applied).
+    // بدون هذه الدالة، رد Island (نجاح/فشل التجميد) يضيع تماماً ولا يوصل
+    // أبداً لـ FreezeManager، فالتجميد الفعلي ما بيحصلش رغم ظهور رسالة "تم".
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         FreezeManager.onActivityResult(requestCode, resultCode)
@@ -69,11 +69,16 @@ class GroupsActivity : AppCompatActivity() {
                 )
             },
             onToggle = { name -> toggleGroupFreeze(name) },
-            onDelete = { name -> confirmDelete(name) }
+            onDelete = { name -> confirmDelete(name) },
+            onTogglePin = { name -> togglePin(name) },
+            onRename = { name -> showRenameDialog(name) }
         )
     }
 
-        private fun toggleGroupFreeze(name: String) {
+    /** يستخدم بالضبط نفس منطق زرّي "تجميد المحدد"/"إلغاء تجميد المحدد" في
+     *  GroupAppsActivity عبر GroupFreezeHelper، فلا يوجد أي مسار منفصل يمكن
+     *  أن يتعارض معه. */
+    private fun toggleGroupFreeze(name: String) {
         val packages = GroupsManager.getPackages(this, name)
         val freezeTarget = !GroupsManager.areAllFrozen(this, name)
         GroupFreezeHelper.apply(this, packages, freezeTarget) {
@@ -81,36 +86,10 @@ class GroupsActivity : AppCompatActivity() {
         }
     }
 
-    private fun processGroupPackage(
-        backend: com.example.link2sdclone.freeze.FreezeBackend,
-        packages: List<String>,
-        index: Int,
-        freezeTarget: Boolean,
-        failures: Int
-    ) {
-        if (index >= packages.size) {
-            refreshList()
-            val msg = if (failures == 0) R.string.group_action_done
-                      else R.string.group_action_partial_failure
-            Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-            return
-        }
-
-        val pkg = packages[index]
-        FreezeManager.setFrozen(this, backend, pkg, freezeTarget) { result ->
-            runOnUiThread {
-                when (result) {
-                    is com.example.link2sdclone.freeze.FreezeResult.PermissionRequested -> {
-                    }
-                    is com.example.link2sdclone.freeze.FreezeResult.Success -> {
-                        processGroupPackage(backend, packages, index + 1, freezeTarget, failures)
-                    }
-                    else -> {
-                        processGroupPackage(backend, packages, index + 1, freezeTarget, failures + 1)
-                    }
-                }
-            }
-        }
+    private fun togglePin(name: String) {
+        val newState = !GroupsManager.isPinned(this, name)
+        GroupsManager.setPinned(this, name, newState)
+        refreshList()
     }
 
     private fun showCreateGroupDialog() {
@@ -121,9 +100,59 @@ class GroupsActivity : AppCompatActivity() {
             .setPositiveButton(R.string.group_create) { _, _ ->
                 val name = input.text.toString().trim()
                 if (name.isNotEmpty()) {
-                    GroupsManager.createGroup(this, name)
+                    if (!GroupsManager.createGroup(this, name)) {
+                        Toast.makeText(this, R.string.group_name_taken, Toast.LENGTH_SHORT).show()
+                    }
                     refreshList()
                 }
+            }
+            .setNegativeButton(R.string.group_cancel, null)
+            .show()
+    }
+
+    private fun showRenameDialog(name: String) {
+        val input = EditText(this).apply {
+            setText(name)
+            setSelection(text.length)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(R.string.group_rename)
+            .setView(input)
+            .setPositiveButton(R.string.group_rename_confirm) { _, _ ->
+                val newName = input.text.toString().trim()
+                if (newName.isEmpty()) return@setPositiveButton
+                if (!GroupsManager.renameGroup(this, name, newName)) {
+                    Toast.makeText(this, R.string.group_name_taken, Toast.LENGTH_SHORT).show()
+                } else {
+                    refreshList()
+                }
+            }
+            .setNegativeButton(R.string.group_cancel, null)
+            .show()
+    }
+
+    private fun showSortDialog() {
+        val labels = arrayOf(
+            getString(R.string.group_sort_name),
+            getString(R.string.group_sort_created),
+            getString(R.string.group_sort_modified),
+            getString(R.string.group_sort_count)
+        )
+        val values = arrayOf(
+            GroupsManager.GroupSort.NAME,
+            GroupsManager.GroupSort.CREATED,
+            GroupsManager.GroupSort.MODIFIED,
+            GroupsManager.GroupSort.COUNT
+        )
+        val current = GroupsManager.getSortMode(this)
+        val checkedIndex = values.indexOf(current).coerceAtLeast(0)
+
+        AlertDialog.Builder(this)
+            .setTitle(R.string.group_sort_title)
+            .setSingleChoiceItems(labels, checkedIndex) { dialog, which ->
+                GroupsManager.setSortMode(this, values[which])
+                refreshList()
+                dialog.dismiss()
             }
             .setNegativeButton(R.string.group_cancel, null)
             .show()
@@ -144,7 +173,9 @@ class GroupsActivity : AppCompatActivity() {
         private val names: List<String>,
         private val onOpen: (String) -> Unit,
         private val onToggle: (String) -> Unit,
-        private val onDelete: (String) -> Unit
+        private val onDelete: (String) -> Unit,
+        private val onTogglePin: (String) -> Unit,
+        private val onRename: (String) -> Unit
     ) : RecyclerView.Adapter<GroupsAdapter.Holder>() {
 
         inner class Holder(view: View) : RecyclerView.ViewHolder(view) {
@@ -152,6 +183,7 @@ class GroupsActivity : AppCompatActivity() {
             val count: TextView = view.findViewById(R.id.group_count)
             val toggle: SwitchCompat = view.findViewById(R.id.group_toggle)
             val delete: ImageButton = view.findViewById(R.id.group_delete)
+            val pin: ImageButton = view.findViewById(R.id.group_pin)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): Holder {
@@ -161,19 +193,28 @@ class GroupsActivity : AppCompatActivity() {
 
         override fun onBindViewHolder(holder: Holder, position: Int) {
             val name = names[position]
-            val count = GroupsManager.getPackages(this@GroupsActivity, name).size
+            val (frozen, total) = GroupsManager.frozenCount(this@GroupsActivity, name)
             holder.name.text = name
-            holder.count.text = getString(R.string.group_apps_count, count)
+            holder.count.text = if (total == 0)
+                getString(R.string.group_apps_count, 0)
+            else
+                getString(R.string.group_frozen_count_format, frozen, total)
 
-            // Clear the listener before setChecked() -- otherwise setting the
-            // switch's state here (to reflect actual frozen status) would
-            // itself fire onCheckedChanged and trigger a spurious toggle.
+            val pinned = GroupsManager.isPinned(this@GroupsActivity, name)
+            holder.pin.setImageResource(
+                if (pinned) android.R.drawable.btn_star_big_on else android.R.drawable.btn_star_big_off
+            )
+
+            // إزالة المستمع قبل ضبط الحالة حتى لا يُطلَق onCheckedChanged بشكل
+            // زائف أثناء ضبط الحالة الحقيقية.
             holder.toggle.setOnCheckedChangeListener(null)
             holder.toggle.isChecked = GroupsManager.areAllFrozen(this@GroupsActivity, name)
             holder.toggle.setOnCheckedChangeListener { _, _ -> onToggle(name) }
 
             holder.itemView.setOnClickListener { onOpen(name) }
+            holder.itemView.setOnLongClickListener { onRename(name); true }
             holder.delete.setOnClickListener { onDelete(name) }
+            holder.pin.setOnClickListener { onTogglePin(name) }
         }
 
         override fun getItemCount(): Int = names.size
