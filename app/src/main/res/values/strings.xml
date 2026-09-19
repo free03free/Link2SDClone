@@ -70,4 +70,4 @@
     <string name="pref_version_title">الإصدار</string>
 
     <string name="group_action_partial_failure">تم تجميد بعض التطبيقات فقط</string>
-</resources>
+    <string name="group_action_frozen_done">تم تجميد تطبيقات المجموعة</string>\n    <string name="group_action_unfrozen_done">تم إلغاء تجميد تطبيقات المجموعة</string>\n</resources>

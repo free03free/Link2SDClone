@@ -100,25 +100,7 @@ class GroupAppsActivity : AppCompatActivity() {
 
     private fun applyToGroup(freeze: Boolean) {
         val packages = GroupsManager.getPackages(this, groupName)
-        if (packages.isEmpty()) {
-            Toast.makeText(this, R.string.group_empty_selection, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val backends = FreezeManager.availableBackends(this)
-        if (backends.isEmpty()) {
-            Toast.makeText(this, R.string.freeze_no_backend_title, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
-        var remaining = packages.size
-        packages.forEach { pkg ->
-            FreezeManager.setFrozen(this, backend, pkg, freeze) { _ ->
-                runOnUiThread {
-                    remaining--
-                    if (remaining == 0) Toast.makeText(this, R.string.group_action_done, Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+        GroupFreezeHelper.apply(this, packages, freeze) { }
     }
 
     private inner class AppsAdapter(

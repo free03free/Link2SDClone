@@ -74,20 +74,11 @@ class GroupsActivity : AppCompatActivity() {
     }
 
         private fun toggleGroupFreeze(name: String) {
-        val packages = GroupsManager.getPackages(this, name).toList()
-        if (packages.isEmpty()) {
-            Toast.makeText(this, R.string.group_empty_selection, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val backends = FreezeManager.availableBackends(this)
-        if (backends.isEmpty()) {
-            Toast.makeText(this, R.string.freeze_no_backend_title, Toast.LENGTH_SHORT).show()
-            return
-        }
-        val backend = FreezeManager.preferredBackend?.takeIf { it in backends } ?: backends.first()
+        val packages = GroupsManager.getPackages(this, name)
         val freezeTarget = !GroupsManager.areAllFrozen(this, name)
-
-        processGroupPackage(backend, packages, 0, freezeTarget, failures = 0)
+        GroupFreezeHelper.apply(this, packages, freezeTarget) {
+            refreshList()
+        }
     }
 
     private fun processGroupPackage(
