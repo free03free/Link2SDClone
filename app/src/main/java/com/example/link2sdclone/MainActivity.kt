@@ -115,6 +115,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         headerCount = findViewById(R.id.list_header_count)
 
         val recyclerView = findViewById<RecyclerView>(R.id.app_list)
+        com.example.link2sdclone.EdgeToEdge.apply(this, toolbar, recyclerView)
         recyclerView.layoutManager = LinearLayoutManager(this)
         recyclerView.addItemDecoration(
             androidx.recyclerview.widget.DividerItemDecoration(

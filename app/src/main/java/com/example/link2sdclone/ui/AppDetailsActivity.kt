@@ -53,6 +53,7 @@ class AppDetailsActivity : AppCompatActivity() {
         bindHeader()
 
         val pager = findViewById<ViewPager2>(R.id.details_pager)
+        com.example.link2sdclone.EdgeToEdge.apply(this, toolbar, pager)
         val tabs = findViewById<TabLayout>(R.id.details_tabs)
         pager.adapter = DetailsPagerAdapter(this, packageNameArg)
 

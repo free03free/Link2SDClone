@@ -68,7 +68,7 @@ object FreezeManager {
                     val alreadyPending = pendingShizukuCallbacks.isNotEmpty()
                     pendingShizukuCallbacks.add { granted ->
                         if (granted) {
-                            onFinalResult(performShizukuFreeze(activity, packageName, freeze))
+                            Thread { onFinalResult(performShizukuFreeze(activity, packageName, freeze)) }.start()
                         } else {
                             onFinalResult(FreezeResult.Failed("shizuku_permission_denied"))
                         }
@@ -82,7 +82,7 @@ object FreezeManager {
                     onFinalResult(FreezeResult.PermissionRequested)
                     return
                 }
-                onFinalResult(performShizukuFreeze(activity, packageName, freeze))
+                Thread { onFinalResult(performShizukuFreeze(activity, packageName, freeze)) }.start()
             }
 
             FreezeBackend.ISLAND -> {
@@ -134,11 +134,17 @@ object FreezeManager {
      * freeze bug this fixes.
      */
     private fun performShizukuFreeze(context: Context, packageName: String, freeze: Boolean): FreezeResult {
-        val ok = ShizukuFreezeBackend.setAppEnabled(packageName, enabled = !freeze)
-        if (!ok) return FreezeResult.Failed("shizuku_call_failed")
-        val nowEnabled = ShizukuFreezeBackend.isAppEnabled(context, packageName)
         val expectedEnabled = !freeze
-        return if (nowEnabled == expectedEnabled) FreezeResult.Success
+        val ok = ShizukuFreezeBackend.setAppEnabled(packageName, enabled = expectedEnabled)
+        if (ok && ShizukuFreezeBackend.isAppEnabled(context, packageName) == expectedEnabled) {
+            return FreezeResult.Success
+        }
+        // بديل: نفس الأمر عبر shell، لأن الاستدعاء الداخلي المخفي قد يتغير بين إصدارات أندرويد
+        if (!Regex("[A-Za-z0-9_.]+").matches(packageName)) return FreezeResult.Failed("shizuku_bad_package")
+        val cmd = if (freeze) "pm disable-user --user 0 $packageName" else "pm enable --user 0 $packageName"
+        val r = PrivilegedShell.run(PrivilegedShell.Mode.SHIZUKU, cmd)
+        if (!r.ok) return FreezeResult.Failed("shizuku_shell_failed: " + r.output.take(100))
+        return if (ShizukuFreezeBackend.isAppEnabled(context, packageName) == expectedEnabled) FreezeResult.Success
         else FreezeResult.Failed("shizuku_verify_failed")
     }
 
