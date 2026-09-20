@@ -44,21 +44,33 @@ class AppListAdapter(
     override fun onBindViewHolder(holder: RowHolder, position: Int) {
         val app = items[position]
         holder.icon.setImageDrawable(app.icon ?: holder.icon.context.getDrawable(R.drawable.ic_android_default))
-        holder.name.text = if (app.isFrozen) {
-            val frozenTag = "-" + holder.itemView.context.getString(R.string.filter_frozen) + "-"
-            val sb = SpannableStringBuilder(app.label)
-            sb.append(" ")
-            val start = sb.length
-            sb.append(frozenTag)
-            sb.setSpan(
-                ForegroundColorSpan(Color.parseColor("#03A9F4")),
-                start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            sb
-        } else {
-            app.label
+        holder.name.text = run<CharSequence> {
+            val ctx = holder.itemView.context
+            val tagList = ArrayList<String>()
+            if (app.isFrozen) tagList.add(ctx.getString(R.string.filter_frozen))
+            if (app.isUpdatedSystem) tagList.add(ctx.getString(R.string.filter_updated))
+            if (app.packageName in com.example.link2sdclone.util.LinkEngine.linkedPackages(ctx)) tagList.add(ctx.getString(R.string.filter_linked))
+            if (tagList.isEmpty()) {
+                app.label
+            } else {
+                val sb = SpannableStringBuilder("\u2068" + app.label + "\u2069 ")
+                val start = sb.length
+                sb.append("\u2067" + tagList.joinToString("  ") { "-" + it + "-" } + "\u2069")
+                sb.setSpan(
+                    ForegroundColorSpan(Color.parseColor("#03A9F4")),
+                    start, sb.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+                )
+                sb
+            }
         }
         holder.path.text = app.apkPath
+        // rowMirror: العربية = أيقونة يسارًا ونجمة يمينًا، الإنجليزية = العكس، والنصوص تبدأ من جهة لغتها
+        val isRtlUi = holder.itemView.resources.configuration.layoutDirection == View.LAYOUT_DIRECTION_RTL
+        holder.itemView.layoutDirection = if (isRtlUi) View.LAYOUT_DIRECTION_LTR else View.LAYOUT_DIRECTION_RTL
+        for (tv in listOf(holder.name, holder.path, holder.sizes)) {
+            tv.textDirection = if (isRtlUi) View.TEXT_DIRECTION_RTL else View.TEXT_DIRECTION_LTR
+            tv.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
+        }
         holder.sizes.text = holder.itemView.context.getString(
             R.string.row_sizes_format,
             formatSize(app.apkSizeBytes),

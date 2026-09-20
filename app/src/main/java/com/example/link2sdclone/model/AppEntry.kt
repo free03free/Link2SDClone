@@ -13,6 +13,7 @@ data class AppEntry(
     var cacheSizeBytes: Long = 0L,     // real value once StorageStatsHelper succeeds, else 0
     var hasRealSizes: Boolean = false, // true once dataSizeBytes/cacheSizeBytes came from StorageStatsManager
     val isSystemApp: Boolean = false,
+    val isUpdatedSystem: Boolean = false,
     val isOnSdCard: Boolean = false,
     var isFrozen: Boolean = false,
     var isFavorite: Boolean = false,

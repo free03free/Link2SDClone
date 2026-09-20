@@ -42,7 +42,7 @@ object LocaleHelper {
         val locales = if (langValue == "default") {
             LocaleListCompat.getEmptyLocaleList()
         } else {
-            LocaleListCompat.forLanguageTags(langValue)
+            LocaleListCompat.forLanguageTags(if (langValue == "ar") "ar-u-nu-latn" else langValue)
         }
         AppCompatDelegate.setApplicationLocales(locales)
     }

@@ -112,6 +112,14 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
         val navView = findViewById<NavigationView>(R.id.nav_view)
         toolbar.setNavigationOnClickListener { drawerLayout.openDrawer(GravityCompat.START) }
         setupDrawer(navView, drawerLayout, this)
+        // navHeaderInset: ارتفاع الترويسة = 48dp + ارتفاع شريط الحالة الفعلي
+        navView.post {
+            val header = navView.getHeaderView(0)
+            val top = androidx.core.view.ViewCompat.getRootWindowInsets(navView)
+                ?.getInsets(androidx.core.view.WindowInsetsCompat.Type.statusBars())?.top ?: 0
+            val base = (48 * resources.displayMetrics.density).toInt()
+            header.layoutParams = header.layoutParams.apply { height = base + top }
+        }
         headerCount = findViewById(R.id.list_header_count)
 
         val recyclerView = findViewById<RecyclerView>(R.id.app_list)
@@ -226,6 +234,7 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 cacheSizeBytes = realSizes?.cacheBytes ?: 0L,
                 hasRealSizes = realSizes != null,
                 isSystemApp = isSystem,
+                isUpdatedSystem = (info.flags and ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0,
                 isOnSdCard = info.sourceDir.contains("/mnt/") || info.sourceDir.contains("/storage/"),
                 isFrozen = isFrozen,
                 isFavorite = com.example.link2sdclone.util.FavoritesManager.isFavorite(this, info.packageName),
@@ -460,8 +469,10 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
                 }
             }
             R.id.ctx_delete -> {
-                val uninstallIntent = Intent(Intent.ACTION_DELETE, Uri.parse("package:${app.packageName}"))
-                startActivity(uninstallIntent)
+                val uninstallIntent = Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.parse("package:${app.packageName}"))
+                    .apply { putExtra(Intent.EXTRA_RETURN_RESULT, true) }
+                Toast.makeText(this, "جاري الحذف...", Toast.LENGTH_SHORT).show()
+                startActivityForResult(uninstallIntent, 7301)
             }
             R.id.ctx_freeze -> handleFreezeToggle(app)
             R.id.ctx_convert_system -> {
@@ -612,6 +623,15 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
             com.example.link2sdclone.ui.BatchActions.nextInQueue(this)
             return
         }
+        if (requestCode == 7301) {
+            if (resultCode == RESULT_OK) {
+                Toast.makeText(this, "تم الحذف", Toast.LENGTH_SHORT).show()
+                loadInstalledApps()
+            } else {
+                Toast.makeText(this, "لم يتم الحذف", Toast.LENGTH_SHORT).show()
+            }
+            return
+        }
         FreezeManager.onActivityResult(requestCode, resultCode) { result ->
             val app = pendingFreezeTarget
             if (app != null) onFreezeResult(app, !app.isFrozen, result)
@@ -620,8 +640,17 @@ class MainActivity : AppCompatActivity(), OverflowActions, DrawerActions {
 
     // ---------------------------------------------------------------------
 
+    @android.annotation.SuppressLint("RestrictedApi")
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         inflateOverflowMenu(menu, this)
+        (menu as? androidx.appcompat.view.menu.MenuBuilder)?.setOptionalIconsVisible(true)
+        val tv = android.util.TypedValue()
+        theme.resolveAttribute(android.R.attr.textColorSecondary, tv, true)
+        val tint = if (tv.resourceId != 0) androidx.core.content.ContextCompat.getColor(this, tv.resourceId) else tv.data
+        for (id in listOf(R.id.action_search, R.id.action_batch_select, R.id.action_storage_info, R.id.action_settings, R.id.action_about)) {
+            val item = menu.findItem(id) ?: continue
+            item.icon = item.icon?.mutate()?.apply { setTint(tint) }
+        }
         return true
     }
 

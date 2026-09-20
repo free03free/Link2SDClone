@@ -42,6 +42,7 @@
 
         <TextView
             android:id="@+id/row_name"
+            android:textAlignment="viewStart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/app_name_text"
@@ -51,6 +52,7 @@
 
         <TextView
             android:id="@+id/row_path"
+            android:textAlignment="viewStart"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/app_path_text"
@@ -65,7 +67,8 @@
             android:layout_height="wrap_content"
             android:textColor="@color/app_size_text"
             android:textSize="12sp"
-            android:gravity="end"
+            android:textAlignment="viewStart"
+            android:textDirection="locale"
             tools:text="apk:689KB Dex:41KB Lib:0.00B البيانات:0.00B الإجمالي:730KB المخبئ:0.00B" />
 
     </LinearLayout>

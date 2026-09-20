@@ -150,7 +150,7 @@ class AppDetailsActivity : AppCompatActivity() {
             true
         }
         R.id.details_delete -> {
-            openIntent(Intent(Intent.ACTION_DELETE, Uri.parse("package:$packageNameArg")))
+            openIntent(Intent(Intent.ACTION_UNINSTALL_PACKAGE, Uri.parse("package:$packageNameArg")))
             true
         }
         R.id.details_freeze -> {
